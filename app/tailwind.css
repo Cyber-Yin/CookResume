@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --color-theme-primary: #007bff;
+    --color-theme-secondary: #007bff4d;
+    --color-font-primary: #000000de;
+    --color-font-secondary: #b1b2b5;
+    --color-background-primary: #fff;
+    --color-background-secondary: #f5f8fc;
+  }
+
+  html {
+    @apply scroll-smooth;
+    font-family: "MiSans", "Noto Sans SC", sans-serif;
+  }
+}
