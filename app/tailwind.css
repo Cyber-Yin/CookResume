@@ -4,16 +4,47 @@
 
 @layer base {
   :root {
-    --color-theme-primary: #007bff;
-    --color-theme-secondary: #007bff4d;
-    --color-font-primary: #000000de;
+    --color-primary-light: #7cc4f8;
+    --color-primary-normal: #0c8ce9;
+
+    --color-danger-light: #dc2626;
+    --color-danger-normal: #b91c1c;
+
+    --color-warning-light: #facc15;
+    --color-warning-normal: #eab308;
+
+    --color-success-light: #22c55e;
+    --color-success-normal: #16a34a;
+
+    --color-font-primary: #0f172a;
     --color-font-secondary: #b1b2b5;
+    --color-font-tertiary: #334155;
+
     --color-background-primary: #fff;
     --color-background-secondary: #f5f8fc;
+    --color-background-tertiary: #cbd5e1;
+    --color-background-hover: #e5e7eb;
+
+    --color-border-primary: #cbd5e1;
+    --color-border-secondary: #e2e8f0;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
   }
 
   html {
     @apply scroll-smooth;
     font-family: "MiSans", "Noto Sans SC", sans-serif;
+  }
+
+  .aspect-image {
+    aspect-ratio: 3/4;
   }
 }
