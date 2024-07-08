@@ -3,7 +3,7 @@
 import { useParams } from "@remix-run/react";
 import axios from "axios";
 import { ArrowDown, ArrowUp, Loader2, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/Button";
 import {
@@ -26,50 +26,10 @@ import {
 } from "@/components/Select";
 import { useToast } from "@/components/Toaster/hooks";
 import { VisuallyHidden } from "@/components/VisuallyHidden";
-import { ResumeData } from "@/lib/types/resume";
 import { cn, formatError, generateRandomSalt, varifyInt } from "@/lib/utils";
+import { BasicDataFormState } from "@/lib/utils/resume";
+import { useFetchResume } from "@/routes/dashboard.resume.edit.$id/hooks/useFetchResume";
 import useResizeObserver from "@/routes/dashboard.resume.edit.$id/hooks/useResizeObserver";
-
-type FormState = {
-  [key: string]: {
-    isCustom: boolean;
-    label: string;
-    sort: number;
-    value: string;
-  };
-};
-
-const Fields = [
-  {
-    key: "name",
-    label: "姓名",
-  },
-  {
-    key: "age",
-    label: "年龄",
-  },
-  {
-    key: "gender",
-    label: "性别",
-    default: "男",
-  },
-  {
-    key: "phone",
-    label: "电话",
-  },
-  {
-    key: "email",
-    label: "邮箱",
-  },
-  {
-    key: "job",
-    label: "意向岗位",
-  },
-  {
-    key: "education",
-    label: "学历",
-  },
-];
 
 const PlaceholderMap = [
   {
@@ -107,43 +67,14 @@ const CheckType = (key: string) => {
   return "text";
 };
 
-const BasicEditor: React.FC<{
-  data: ResumeData;
-}> = ({ data }) => {
+const BasicEditor: React.FC = () => {
   const { toast } = useToast();
   const { id } = useParams();
 
-  const [formState, setFormState] = useState<FormState>(() => {
-    const basicData = data.basic || [];
+  const { resumeInfo, refreshResume, resumeLoading, resumeValidating } =
+    useFetchResume();
 
-    const initialState = Fields.reduce<FormState>((acc, field, index) => {
-      return {
-        ...acc,
-        [field.key]: {
-          label: field.label,
-          isCustom: false,
-          sort: index,
-          value: field.default || "",
-        },
-      };
-    }, {});
-
-    basicData.forEach((item) => {
-      if (initialState[item.key]) {
-        initialState[item.key].sort = item.sort;
-        initialState[item.key].value = item.value;
-      } else {
-        initialState[item.key] = {
-          label: item.label || item.key,
-          sort: item.sort,
-          isCustom: true,
-          value: item.value,
-        };
-      }
-    });
-
-    return initialState;
-  });
+  const [formState, setFormState] = useState<BasicDataFormState>({});
 
   const formItems = useMemo(
     () =>
@@ -179,39 +110,15 @@ const BasicEditor: React.FC<{
 
       setSubmitLoading(true);
 
-      const { data: resumeUpdateResponse } = await axios.post<{
-        data: {
-          content: string;
-        };
-      }>("/api/resume/update", {
+      await axios.post("/api/resume/update", {
         resume_id: parseInt(id),
         content: JSON.stringify({
-          ...data,
+          ...resumeInfo!.rawContent,
           basic: updateData,
         }),
       });
 
-      const updatedContent: ResumeData = JSON.parse(
-        resumeUpdateResponse.data.content,
-      );
-
-      if (updatedContent.basic) {
-        setFormState(() => {
-          return updatedContent.basic.reduce<FormState>((acc, item) => {
-            const defaultItem = Fields.find((i) => i.key === item.key);
-
-            return {
-              ...acc,
-              [item.key]: {
-                isCustom: defaultItem ? false : true,
-                label: item.label,
-                sort: item.sort,
-                value: item.value,
-              },
-            };
-          }, {});
-        });
-      }
+      refreshResume();
 
       toast({
         title: "保存成功",
@@ -229,6 +136,12 @@ const BasicEditor: React.FC<{
       setSubmitLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!resumeInfo) return;
+
+    setFormState(resumeInfo.formattedContent.basic);
+  }, [resumeInfo]);
 
   return (
     <div
@@ -325,7 +238,7 @@ const BasicEditor: React.FC<{
           添加词条
         </Button>
         <Button
-          disabled={submitLoading}
+          disabled={submitLoading || resumeLoading || resumeValidating}
           onClick={handleSubmit}
         >
           {submitLoading ? (
@@ -364,7 +277,7 @@ const SortTool: React.FC<{
     isCustom: boolean;
     value: string;
   };
-  setFormState: React.Dispatch<React.SetStateAction<FormState>>;
+  setFormState: React.Dispatch<React.SetStateAction<BasicDataFormState>>;
 }> = ({ children, item, setFormState }) => {
   return (
     <div className="group relative w-full">
