@@ -1,5 +1,6 @@
 export type ResumeConfig = {
   template: number;
+  avatar?: string;
 };
 
 export type ResumeBasicData = {
@@ -20,4 +21,17 @@ export type ResumeDetailResponse = {
   published: number;
   created_at: number;
   updated_at: number;
+};
+
+export type FormattedResumeContent = {
+  config: ResumeConfig;
+  basic: Record<
+    string,
+    {
+      isCustom: boolean;
+      label: string;
+      value: string;
+      sort: number;
+    }
+  >;
 };

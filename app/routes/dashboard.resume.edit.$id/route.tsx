@@ -1,5 +1,4 @@
-import { LoaderFunction, json } from "@remix-run/node";
-import { useLoaderData, useSearchParams } from "@remix-run/react";
+import { useSearchParams } from "@remix-run/react";
 import { useMemo } from "react";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 
@@ -9,90 +8,28 @@ import {
   ResizablePanelGroup,
 } from "@/components/Resizable";
 import { ScrollArea } from "@/components/ScrollArea";
-import { checkUserIsLogin } from "@/lib/services/auth.server";
-import DatabaseInstance from "@/lib/services/prisma.server";
-import { ResumeData, ResumeDetailResponse } from "@/lib/types/resume";
-import { formatError, varifyInt } from "@/lib/utils";
 
 import MenuBar from "./components/MenuBar";
 import { DEFAULT_MENU_ITEMS } from "./const";
 
-export const loader: LoaderFunction = async ({ params, request }) => {
-  try {
-    if (!params.id) {
-      throw new Error("缺少简历 ID");
-    }
-
-    const resumeId = parseInt(params.id);
-
-    try {
-      varifyInt.parse(resumeId);
-    } catch (e) {
-      throw new Error("无效的简历 ID");
-    }
-
-    const { userId } = await checkUserIsLogin(request);
-
-    if (!userId) {
-      throw new Error("用户未登录");
-    }
-
-    const resume = await DatabaseInstance.resume.findUnique({
-      where: {
-        id: resumeId,
-      },
-    });
-
-    if (!resume) {
-      throw new Error("简历不存在");
-    }
-
-    if (resume.user_id !== userId) {
-      throw new Error("无权访问");
-    }
-
-    return json({
-      resume,
-    });
-  } catch (e) {
-    return json(
-      {
-        message: formatError(e),
-      },
-      {
-        status: 500,
-      },
-    );
-  }
-};
-
 export default function DashboardResumeEditPage() {
-  const { resume } = useLoaderData<{
-    resume: ResumeDetailResponse;
-  }>();
   return (
     <>
-      <DesktopPanel resume={resume} />
+      <DesktopPanel />
     </>
   );
 }
 
-const DesktopPanel: React.FC<{
-  resume: ResumeDetailResponse;
-}> = ({ resume }) => {
+const DesktopPanel: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const tab = useMemo(() => {
     return searchParams.get("tab") || "basic";
   }, [searchParams]);
 
-  const editor = useMemo(() => {
+  const EditorComponent = useMemo(() => {
     return DEFAULT_MENU_ITEMS.find((item) => item.key === tab)?.editor;
   }, [tab]);
-
-  const data: ResumeData = useMemo(() => {
-    return JSON.parse(resume.content);
-  }, [resume]);
 
   return (
     <main className="flex h-screen min-h-screen bg-custom-secondary pt-16">
@@ -102,11 +39,7 @@ const DesktopPanel: React.FC<{
         direction="horizontal"
       >
         <ResizablePanel defaultSize={50}>
-          {editor
-            ? editor({
-                data,
-              })
-            : null}
+          {EditorComponent ? <EditorComponent /> : null}
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={50}>
