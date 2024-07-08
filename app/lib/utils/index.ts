@@ -2,7 +2,7 @@ import { isAxiosError } from "axios";
 import { type ClassValue, clsx } from "clsx";
 import { sha256 } from "js-sha256";
 import { twMerge } from "tailwind-merge";
-import { ZodSchema } from "zod";
+import { ZodSchema, z } from "zod";
 
 export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
@@ -54,3 +54,5 @@ export const verifyPassword = (
 ) => {
   return password === sha256(input + salt);
 };
+
+export const varifyInt = z.number().int().min(1);
