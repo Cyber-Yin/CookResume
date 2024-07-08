@@ -16,3 +16,13 @@ model user {
     avatar    String? @db.VarChar(255)
     verified  Int     @db.UnsignedTinyInt
 }
+
+model resume {
+    id         Int    @id @default(autoincrement())
+    title      String @db.VarChar(255)
+    user_id    Int    @db.UnsignedInt
+    content    String @db.LongText
+    published  Int    @db.UnsignedTinyInt
+    created_at Int    @db.UnsignedInt
+    updated_at Int    @db.UnsignedInt
+}
