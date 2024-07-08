@@ -1,97 +1,18 @@
-import { Button } from "@nextui-org/react";
-import {
-  ActionFunction,
-  LoaderFunction,
-  json,
-  redirect,
-} from "@remix-run/node";
+import { LoaderFunction, json, redirect } from "@remix-run/node";
 import { useNavigate } from "@remix-run/react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { sha256 } from "js-sha256";
+import { Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { z } from "zod";
 
-import CustomCheckbox from "@/components/CustomCheckbox";
-import CustomInput from "@/components/CustomInput";
+import { Button } from "@/components/Button";
+import { Checkbox } from "@/components/Checkbox";
+import { FormInput, PasswordInput } from "@/components/Input";
+import { Label } from "@/components/Label";
 import { useToast } from "@/components/Toaster/hooks";
 import { checkUserIsLogin } from "@/lib/services/auth.server";
-import DatabaseInstance from "@/lib/services/prisma.server";
-import {
-  cn,
-  formatError,
-  generateRandomSalt,
-  validateEmail,
-  validatePayload,
-} from "@/lib/utils";
-
-const RequestSchema = z.object({
-  userName: z
-    .string()
-    .min(3)
-    .max(12)
-    .regex(/^[a-zA-Z][a-zA-Z0-9_]*$/),
-  email: z.string().email(),
-  password: z
-    .string()
-    .min(8)
-    .regex(/^(?=.*[A-Za-z])(?=.*\d).+$/),
-});
-
-type RequestSchemaType = z.infer<typeof RequestSchema>;
-
-export const action: ActionFunction = async ({ request }) => {
-  try {
-    const data: RequestSchemaType = await request.json();
-
-    validatePayload(RequestSchema, data);
-
-    const user = await DatabaseInstance.user.findFirst({
-      select: {
-        id: true,
-      },
-      where: {
-        OR: [
-          {
-            user_name: data.userName,
-          },
-          {
-            email: data.email,
-          },
-        ],
-      },
-    });
-
-    if (user) {
-      throw new Error("该账号已被注册");
-    }
-
-    const salt = generateRandomSalt();
-
-    await DatabaseInstance.user.create({
-      data: {
-        user_name: data.userName,
-        email: data.email,
-        password: sha256(data.password + salt),
-        salt,
-        verified: 0,
-      },
-    });
-
-    return json({
-      success: true,
-    });
-  } catch (e) {
-    return json(
-      {
-        message: formatError(e),
-      },
-      {
-        status: 400,
-      },
-    );
-  }
-};
+import { cn, formatError, validateEmail } from "@/lib/utils";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const { isLogin } = await checkUserIsLogin(request);
@@ -254,7 +175,7 @@ export default function SignUpPage() {
     try {
       setRegisterLoading(true);
 
-      await axios.post("/sign-up", {
+      await axios.post("/api/sign-up", {
         userName: formState.data.userName,
         email: formState.data.email,
         password: sha256(formState.data.password),
@@ -307,191 +228,163 @@ export default function SignUpPage() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="flex h-full w-full flex-col items-center justify-center space-y-12 bg-custom px-4 py-16 sm:h-auto sm:rounded-lg sm:border-t-4 sm:border-t-primary-400 sm:shadow-lg"
+        className="flex h-full w-full flex-col items-center justify-center space-y-12 bg-custom px-4 py-16 sm:h-auto sm:rounded-lg sm:border-t-4 sm:border-t-primary sm:shadow-lg"
       >
         {step === "wait" && (
           <>
             <h1 className="text-2xl font-bold">注册账号</h1>
             <div className="w-full space-y-4 sm:max-w-[360px]">
-              <div className="w-full space-y-8">
-                <CustomInput
-                  props={{
-                    value: formState.data.userName,
-                    onValueChange: (value) => {
-                      setFormState((prev) => ({
-                        data: {
-                          ...prev.data,
-                          userName: value,
-                        },
-                        error: {
-                          ...prev.error,
-                          userName: "",
-                        },
-                      }));
-                    },
-                    label: "用户名",
-                    placeholder: "请输入用户名",
-                    type: "text",
-                    isClearable: true,
-                    isInvalid: !!formState.error.userName,
-                    errorMessage: formState.error.userName,
-                    onBlur: () => checkRegisterUsernameAndEmail("username"),
-                    description:
-                      "3-12 位，支持大小写字母、数字和下划线，不能以数字或下划线开头",
+              <div className="w-full space-y-3">
+                <FormInput
+                  label="用户名"
+                  placeholder="请输入用户名"
+                  description="3-12 位，支持大小写字母、数字和下划线，不能以数字或下划线开头"
+                  value={formState.data.userName}
+                  error={formState.error.userName}
+                  onValueChange={(v, e) => {
+                    setFormState((prev) => ({
+                      data: {
+                        ...prev.data,
+                        userName: v,
+                      },
+                      error: {
+                        ...prev.error,
+                        userName: e,
+                      },
+                    }));
                   }}
                 />
-                <CustomInput
-                  props={{
-                    value: formState.data.email,
-                    onValueChange: (value) => {
-                      setFormState((prev) => ({
-                        data: {
-                          ...prev.data,
-                          email: value,
-                        },
-                        error: {
-                          ...prev.error,
-                          email: "",
-                        },
-                      }));
-                    },
-                    label: "邮箱",
-                    placeholder: "请输入邮箱",
-                    type: "email",
-                    isClearable: true,
-                    isInvalid: !!formState.error.email,
-                    errorMessage: formState.error.email,
-                    onBlur: () => checkRegisterUsernameAndEmail("email"),
+                <FormInput
+                  label="邮箱"
+                  placeholder="请输入邮箱"
+                  value={formState.data.email}
+                  error={formState.error.email}
+                  onValueChange={(v, e) => {
+                    setFormState((prev) => ({
+                      data: {
+                        ...prev.data,
+                        email: v,
+                      },
+                      error: {
+                        ...prev.error,
+                        email: e,
+                      },
+                    }));
                   }}
                 />
-                <div className="w-full space-y-2">
-                  <CustomInput
-                    props={{
-                      value: formState.data.password,
-                      onValueChange: (value) => {
-                        setFormState((prev) => ({
-                          data: {
-                            ...prev.data,
-                            password: value,
-                          },
-                          error: {
-                            ...prev.error,
-                            password: "",
-                          },
-                        }));
+                <PasswordInput
+                  label="密码"
+                  placeholder="请输入密码"
+                  description="至少 8 位，必须同时包含字母和数字"
+                  value={formState.data.password}
+                  error={formState.error.password}
+                  onValueChange={(v, e) => {
+                    setFormState((prev) => ({
+                      data: {
+                        ...prev.data,
+                        password: v,
                       },
-                      label: "密码",
-                      placeholder: "请输入密码",
-                      type: passwordVisible ? "text" : "password",
-                      isInvalid: !!formState.error.password,
-                      errorMessage: formState.error.password,
-                      endContent: (
-                        <button
-                          className="focus:outline-none"
-                          type="button"
-                          onClick={() => setPasswordVisible((prev) => !prev)}
-                        >
-                          {passwordVisible ? (
-                            <img
-                              className="h-5 w-5 text-foreground opacity-70 transition-opacity hover:opacity-100"
-                              src="/icons/eye-off.svg"
-                            />
-                          ) : (
-                            <img
-                              className="h-5 w-5 text-foreground opacity-70 transition-opacity hover:opacity-100"
-                              src="/icons/eye.svg"
-                            />
-                          )}
-                        </button>
-                      ),
-                      description: "至少 8 位，必须同时包含字母和数字",
-                    }}
-                  />
-                  <div
-                    className={cn(
-                      "flex w-full items-center space-x-4 rounded-lg border-1.5 px-4 py-2",
-                      {
-                        "border-red-500": passwordSecurity < 2,
-                        "border-yellow-500": passwordSecurity === 2,
-                        "border-green-500": passwordSecurity === 3,
+                      error: {
+                        ...prev.error,
+                        password: e,
                       },
-                    )}
-                  >
-                    <div className="grid grow grid-cols-3 gap-2">
-                      <div
-                        className={cn("h-1.5 w-full rounded-lg", {
-                          "bg-default-200": passwordSecurity === 0,
-                          "bg-red-500": passwordSecurity === 1,
-                          "bg-yellow-500": passwordSecurity === 2,
-                          "bg-green-500": passwordSecurity === 3,
-                        })}
-                      ></div>
-                      <div
-                        className={cn("h-1.5 w-full rounded-lg", {
-                          "bg-default-200": passwordSecurity < 2,
-                          "bg-yellow-500": passwordSecurity === 2,
-                          "bg-green-500": passwordSecurity === 3,
-                        })}
-                      ></div>
-                      <div
-                        className={cn("h-1.5 w-full rounded-lg", {
-                          "bg-default-200": passwordSecurity < 3,
-                          "bg-green-500": passwordSecurity === 3,
-                        })}
-                      ></div>
-                    </div>
+                    }));
+                  }}
+                />
+                <div
+                  className={cn(
+                    "flex w-full items-center space-x-4 rounded-lg border-[1.5px] px-4 py-2",
+                    {
+                      "border-danger-light": passwordSecurity < 2,
+                      "border-warning-light": passwordSecurity === 2,
+                      "border-success-light": passwordSecurity === 3,
+                    },
+                  )}
+                >
+                  <div className="grid grow grid-cols-3 gap-2">
                     <div
-                      className={cn("text-sm font-semibold", {
-                        "text-red-500": passwordSecurity < 2,
-                        "text-yellow-500": passwordSecurity === 2,
-                        "text-green-500": passwordSecurity === 3,
+                      className={cn("h-1.5 w-full rounded-lg", {
+                        "bg-custom-tertiary": passwordSecurity === 0,
+                        "bg-danger-light": passwordSecurity === 1,
+                        "bg-warning-light": passwordSecurity === 2,
+                        "bg-success-light": passwordSecurity === 3,
                       })}
-                    >
-                      {passwordSecurity < 2
-                        ? "弱"
-                        : passwordSecurity === 2
-                          ? "中"
-                          : "强"}
-                    </div>
+                    ></div>
+                    <div
+                      className={cn("h-1.5 w-full rounded-lg", {
+                        "bg-custom-tertiary": passwordSecurity < 2,
+                        "bg-warning-light": passwordSecurity === 2,
+                        "bg-success-light": passwordSecurity === 3,
+                      })}
+                    ></div>
+                    <div
+                      className={cn("h-1.5 w-full rounded-lg", {
+                        "bg-custom-tertiary": passwordSecurity < 3,
+                        "bg-success-light": passwordSecurity === 3,
+                      })}
+                    ></div>
+                  </div>
+                  <div
+                    className={cn("text-sm font-semibold", {
+                      "text-red-500": passwordSecurity < 2,
+                      "text-yellow-500": passwordSecurity === 2,
+                      "text-green-500": passwordSecurity === 3,
+                    })}
+                  >
+                    {passwordSecurity < 2
+                      ? "弱"
+                      : passwordSecurity === 2
+                        ? "中"
+                        : "强"}
                   </div>
                 </div>
               </div>
               <div className="flex items-center">
-                <CustomCheckbox
-                  props={{
-                    isSelected: formState.data.readPolicy,
-                    onValueChange: (isSelected) => {
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="readPolicy"
+                    checked={formState.data.readPolicy}
+                    onCheckedChange={(isChecked) => {
                       setFormState((prev) => ({
                         data: {
                           ...prev.data,
-                          readPolicy: isSelected,
+                          readPolicy: isChecked === false ? false : true,
                         },
                         error: {
                           ...prev.error,
                           readPolicy: "",
                         },
                       }));
-                    },
-                    isInvalid: !!formState.error.readPolicy,
-                  }}
-                >
-                  我已阅读
-                </CustomCheckbox>
-                <span className="cursor-pointer select-none text-small font-semibold text-primary-400">
+                    }}
+                    className={cn("cursor-pointer", {
+                      "border-danger": formState.error.readPolicy,
+                    })}
+                  />
+                  <Label
+                    htmlFor="readPolicy"
+                    className={cn("cursor-pointer", {
+                      "text-custom": !formState.error.readPolicy,
+                      "text-danger": formState.error.readPolicy,
+                    })}
+                  >
+                    我已阅读
+                  </Label>
+                </div>
+                <span className="cursor-pointer text-sm font-semibold text-primary">
                   《隐私协议》
                 </span>
               </div>
-
               <div className="flex w-full flex-col items-center space-y-2">
                 <Button
-                  isDisabled={registerLoading || !canRegister}
+                  disabled={registerLoading || !canRegister}
                   className="w-full sm:max-w-[360px]"
-                  radius="sm"
-                  color="primary"
                   onClick={() => register()}
-                  isLoading={registerLoading}
                 >
-                  注册
+                  {registerLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "注册"
+                  )}
                 </Button>
               </div>
             </div>
@@ -509,6 +402,7 @@ export default function SignUpPage() {
                 cy="50"
                 r="45"
                 stroke="#22c55e"
+                strokeLinecap="round"
                 strokeWidth="7"
                 fill="none"
                 initial={{ pathLength: 0, opacity: 0 }}
@@ -530,8 +424,6 @@ export default function SignUpPage() {
             </div>
             <Button
               className="w-40"
-              radius="sm"
-              color="primary"
               onClick={() => navigate("/sign-in")}
             >
               确认
