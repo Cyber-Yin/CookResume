@@ -47,4 +47,17 @@
   .aspect-image {
     aspect-ratio: 3/4;
   }
+
+  .editor .ProseMirror {
+    min-height: 100px;
+    padding: 5px 10px;
+  }
+
+  :focus-visible {
+    outline: none;
+  }
+
+  [data-radix-scroll-area-viewport] > * {
+    display: block !important;
+  }
 }

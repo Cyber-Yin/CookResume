@@ -32,6 +32,7 @@ export const useFetchResume = () => {
         const formattedContent: FormattedResumeContent = {
           config: jsonContent.config,
           basic: formatResumeBasicData(jsonContent.basic || []),
+          education: jsonContent.education || [],
         };
 
         return {

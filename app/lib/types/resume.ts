@@ -13,6 +13,7 @@ export type ResumeBasicData = {
 export type ResumeData = {
   config: ResumeConfig;
   basic: ResumeBasicData[];
+  education: EducationFormState[];
 };
 
 export type ResumeDetailResponse = {
@@ -34,4 +35,25 @@ export type FormattedResumeContent = {
       sort: number;
     }
   >;
+  education: EducationFormState[];
+};
+
+export type BasicDataFormState = {
+  [key: string]: {
+    isCustom: boolean;
+    label: string;
+    sort: number;
+    value: string;
+  };
+};
+
+export type EducationFormState = {
+  experience: string;
+  sort: number;
+  basicData: {
+    school: string;
+    major: string;
+    startDate: string;
+    endDate: string;
+  };
 };

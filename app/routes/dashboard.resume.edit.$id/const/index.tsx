@@ -1,4 +1,5 @@
 import BasicEditor from "../components/Editor/Basic";
+import EducationEditor from "../components/Editor/Education";
 import TemplateEditor from "../components/Editor/Template";
 
 export const DEFAULT_MENU_ITEMS = [
@@ -20,7 +21,7 @@ export const DEFAULT_MENU_ITEMS = [
   {
     key: "education",
     label: "教育经历",
-    editor: TemplateEditor,
+    editor: EducationEditor,
   },
   {
     key: "experience",
