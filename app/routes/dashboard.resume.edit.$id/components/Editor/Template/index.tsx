@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/Button";
 import { ScrollArea } from "@/components/ScrollArea";
 import { useToast } from "@/components/Toaster/hooks";
+import { FADE_IN_ANIMATION } from "@/lib/const/animation";
 import { RESUME_TEMPLATE } from "@/lib/const/resume-template";
 import { cn, formatError, varifyInt } from "@/lib/utils";
 import { useFetchResume } from "@/routes/dashboard.resume.edit.$id/hooks/useFetchResume";
@@ -25,7 +26,6 @@ const TemplateEditor: React.FC = () => {
   const { ref: editorRef, width: editorWidth } = useResizeObserver();
 
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [addItemModalOpen, setAddItemModalOpen] = useState(false);
 
   const handleSubmit = async () => {
     try {
@@ -92,17 +92,10 @@ const TemplateEditor: React.FC = () => {
         >
           {RESUME_TEMPLATE.map((item, index) => (
             <motion.div
-              initial={{
-                opacity: 0,
-                y: 50,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              transition={{
-                delay: index * 0.1,
-              }}
+              variants={FADE_IN_ANIMATION}
+              initial="hidden"
+              animate="visible"
+              custom={index}
               onClick={() => {
                 setSelectedTemplate(index);
               }}
