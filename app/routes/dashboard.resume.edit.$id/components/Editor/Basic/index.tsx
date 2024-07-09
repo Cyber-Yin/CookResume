@@ -26,8 +26,8 @@ import {
 } from "@/components/Select";
 import { useToast } from "@/components/Toaster/hooks";
 import { VisuallyHidden } from "@/components/VisuallyHidden";
+import { BasicDataFormState } from "@/lib/types/resume";
 import { cn, formatError, generateRandomSalt, varifyInt } from "@/lib/utils";
-import { BasicDataFormState } from "@/lib/utils/resume";
 import { useFetchResume } from "@/routes/dashboard.resume.edit.$id/hooks/useFetchResume";
 import useResizeObserver from "@/routes/dashboard.resume.edit.$id/hooks/useResizeObserver";
 
@@ -76,7 +76,7 @@ const BasicEditor: React.FC = () => {
 
   const [formState, setFormState] = useState<BasicDataFormState>({});
 
-  const formItems = useMemo(
+  const sortedItems = useMemo(
     () =>
       Object.entries(formState)
         .map(([key, item]) => ({ key, ...item }))
@@ -156,7 +156,7 @@ const BasicEditor: React.FC = () => {
             "grid-cols-3": editorWidth > 900,
           })}
         >
-          {formItems.map((item) => {
+          {sortedItems.map((item) => {
             const placeholder = PlaceholderMap.find(
               (i) => i.key === item.key,
             )?.placeholder;
@@ -164,6 +164,7 @@ const BasicEditor: React.FC = () => {
             if (item.key === "gender") {
               return (
                 <SortTool
+                  sortedItems={sortedItems}
                   key="gender"
                   item={item}
                   setFormState={setFormState}
@@ -202,6 +203,7 @@ const BasicEditor: React.FC = () => {
 
             return (
               <SortTool
+                sortedItems={sortedItems}
                 item={item}
                 setFormState={setFormState}
                 key={item.key}
@@ -253,7 +255,9 @@ const BasicEditor: React.FC = () => {
         onClose={() => setAddItemModalOpen(false)}
         onSubmit={(v) => {
           const key = generateRandomSalt(6);
-          const sort = formItems.length;
+
+          // use last item sort as base
+          const sort = sortedItems[sortedItems.length - 1].sort + 1;
           setFormState((prev) => ({
             ...prev,
             [key]: {
@@ -277,8 +281,15 @@ const SortTool: React.FC<{
     isCustom: boolean;
     value: string;
   };
+  sortedItems: {
+    isCustom: boolean;
+    label: string;
+    sort: number;
+    value: string;
+    key: string;
+  }[];
   setFormState: React.Dispatch<React.SetStateAction<BasicDataFormState>>;
-}> = ({ children, item, setFormState }) => {
+}> = ({ children, item, sortedItems, setFormState }) => {
   return (
     <div className="group relative w-full">
       {children}
@@ -286,33 +297,28 @@ const SortTool: React.FC<{
         <ArrowUp
           onClick={() => {
             setFormState((prev) => {
-              const currentIndex = prev[item.key].sort;
-
-              const items = Object.entries(prev).map(([key, value]) => ({
-                key,
-                sort: value.sort,
-              }));
-
-              const prevItemIndex = items.findIndex(
-                (i) => i.sort === currentIndex - 1,
+              const currentIndex = sortedItems.findIndex(
+                (i) => i.key === item.key,
               );
 
-              if (prevItemIndex !== -1) {
-                const prevItemKey = items[prevItemIndex].key;
-                return {
-                  ...prev,
-                  [item.key]: {
-                    ...prev[item.key],
-                    sort: prev[item.key].sort - 1,
-                  },
-                  [prevItemKey]: {
-                    ...prev[prevItemKey],
-                    sort: prev[prevItemKey].sort + 1,
-                  },
-                };
-              }
+              // not first item and found
+              if (currentIndex < 1) return prev;
 
-              return prev;
+              const prevItem = sortedItems[currentIndex - 1];
+
+              if (!prevItem) return prev;
+
+              return {
+                ...prev,
+                [item.key]: {
+                  ...prev[item.key],
+                  sort: prevItem.sort,
+                },
+                [prevItem.key]: {
+                  ...prev[prevItem.key],
+                  sort: item.sort,
+                },
+              };
             });
           }}
           className="h-3.5 w-3.5 cursor-pointer transition-colors hover:text-primary"
@@ -320,33 +326,32 @@ const SortTool: React.FC<{
         <ArrowDown
           onClick={() => {
             setFormState((prev) => {
-              const currentIndex = prev[item.key].sort;
-
-              const items = Object.entries(prev).map(([key, value]) => ({
-                key,
-                sort: value.sort,
-              }));
-
-              const prevItemIndex = items.findIndex(
-                (i) => i.sort === currentIndex + 1,
+              const currentIndex = sortedItems.findIndex(
+                (i) => i.key === item.key,
               );
 
-              if (prevItemIndex !== -1) {
-                const prevItemKey = items[prevItemIndex].key;
-                return {
-                  ...prev,
-                  [item.key]: {
-                    ...prev[item.key],
-                    sort: prev[item.key].sort + 1,
-                  },
-                  [prevItemKey]: {
-                    ...prev[prevItemKey],
-                    sort: prev[prevItemKey].sort - 1,
-                  },
-                };
-              }
+              // not last item and found
+              if (
+                currentIndex === sortedItems.length - 1 ||
+                currentIndex === -1
+              )
+                return prev;
 
-              return prev;
+              const nextItem = sortedItems[currentIndex + 1];
+
+              if (!nextItem) return prev;
+
+              return {
+                ...prev,
+                [item.key]: {
+                  ...prev[item.key],
+                  sort: nextItem.sort,
+                },
+                [nextItem.key]: {
+                  ...prev[nextItem.key],
+                  sort: item.sort,
+                },
+              };
             });
           }}
           className="h-3.5 w-3.5 cursor-pointer transition-colors hover:text-primary"
