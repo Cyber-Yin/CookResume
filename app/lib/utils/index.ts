@@ -56,3 +56,21 @@ export const verifyPassword = (
 };
 
 export const varifyInt = z.number().int().min(1);
+
+export const checkRichTextOutputIsNull = (value: string) => {
+  const regArray = [
+    "<p></p>",
+    "<ul><li><p></p></li></ul>",
+    "<ol><li><p></p></li></ol>",
+    "<pre><code></code></pre>",
+    "<blockquote><p></p></blockquote>",
+  ];
+
+  for (const reg of regArray) {
+    if (value === reg) {
+      return "";
+    }
+  }
+
+  return value;
+};

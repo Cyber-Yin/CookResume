@@ -1,13 +1,4 @@
-import { ResumeBasicData } from "../types/resume";
-
-export type BasicDataFormState = {
-  [key: string]: {
-    isCustom: boolean;
-    label: string;
-    sort: number;
-    value: string;
-  };
-};
+import { BasicDataFormState, ResumeBasicData } from "../types/resume";
 
 export const BasicDataFields = [
   {
