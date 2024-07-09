@@ -1,6 +1,8 @@
 import { useNavigate } from "@remix-run/react";
 import { motion } from "framer-motion";
 
+import { FADE_IN_ANIMATION } from "@/lib/const/animation";
+
 const circleVariants = {
   visible: {
     opacity: 1,
@@ -24,14 +26,10 @@ const CreateResumeCard = () => {
 
   return (
     <motion.div
-      initial={{
-        opacity: 0,
-        y: 50,
-      }}
-      animate={{
-        opacity: 1,
-        y: 0,
-      }}
+      variants={FADE_IN_ANIMATION}
+      initial="hidden"
+      animate="visible"
+      custom={0}
       className="aspect-image flex flex-col items-center justify-center space-y-4 rounded-lg border border-custom bg-white"
     >
       <div className="text-xl font-semibold text-custom-tertiary">新建简历</div>

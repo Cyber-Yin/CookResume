@@ -8,6 +8,7 @@ import { Button } from "@/components/Button";
 import { FormInput } from "@/components/Input";
 import { Label } from "@/components/Label";
 import { useToast } from "@/components/Toaster/hooks";
+import { FADE_IN_ANIMATION } from "@/lib/const/animation";
 import { RESUME_TEMPLATE } from "@/lib/const/resume-template";
 import { cn, formatError } from "@/lib/utils";
 
@@ -85,17 +86,10 @@ const CreateResumeForm = () => {
         <div className="grid w-full grid-cols-3 gap-4">
           {RESUME_TEMPLATE.map((item, index) => (
             <motion.div
-              initial={{
-                opacity: 0,
-                y: 50,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              transition={{
-                delay: index * 0.1,
-              }}
+              variants={FADE_IN_ANIMATION}
+              initial="hidden"
+              animate="visible"
+              custom={index}
               onClick={() => {
                 setFormState({ ...formState, template: index });
               }}

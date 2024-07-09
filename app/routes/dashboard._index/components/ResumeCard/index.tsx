@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { CalendarDays, Eye } from "lucide-react";
 
 import { Button } from "@/components/Button";
+import { FADE_IN_ANIMATION } from "@/lib/const/animation";
 import { RESUME_TEMPLATE } from "@/lib/const/resume-template";
 import { ResumeData } from "@/lib/types/resume";
 import { cn } from "@/lib/utils";
@@ -27,17 +28,10 @@ const ResumeCard: React.FC<{
 
   return (
     <motion.div
-      initial={{
-        opacity: 0,
-        y: 50,
-      }}
-      animate={{
-        opacity: 1,
-        y: 0,
-      }}
-      transition={{
-        delay: (index + 1) * 0.1,
-      }}
+      variants={FADE_IN_ANIMATION}
+      initial="hidden"
+      animate="visible"
+      custom={index + 1}
       className="group relative overflow-hidden rounded-lg border border-custom transition-colors hover:border-primary"
     >
       <div className="aspect-image w-full">
