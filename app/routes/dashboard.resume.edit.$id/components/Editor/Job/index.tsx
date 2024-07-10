@@ -21,22 +21,17 @@ import { ScrollArea } from "@/components/ScrollArea";
 import { useToast } from "@/components/Toaster/hooks";
 import { VisuallyHidden } from "@/components/VisuallyHidden";
 import { OPACITY_ANIMATION } from "@/lib/const/animation";
-import { EducationFormState } from "@/lib/types/resume";
-import {
-  checkRichTextOutputIsNull,
-  cn,
-  formatError,
-  varifyInt,
-} from "@/lib/utils";
+import { JobFormState } from "@/lib/types/resume";
+import { checkRichTextOutputIsNull, formatError, varifyInt } from "@/lib/utils";
 import { useFetchResume } from "@/routes/dashboard.resume.edit.$id/hooks/useFetchResume";
 
-const EducationEditor: React.FC = () => {
+const JobEditor: React.FC = () => {
   const { toast } = useToast();
   const { id } = useParams();
   const { resumeInfo, refreshResume, resumeLoading, resumeValidating } =
     useFetchResume();
 
-  const [formState, setFormState] = useState<EducationFormState[]>([]);
+  const [formState, setFormState] = useState<JobFormState[]>([]);
 
   const sortedItems = useMemo(
     () => formState.sort((a, b) => a.sort - b.sort),
@@ -64,7 +59,7 @@ const EducationEditor: React.FC = () => {
         resume_id: parseInt(id),
         content: JSON.stringify({
           ...resumeInfo!.rawContent,
-          education: formState,
+          job: formState,
         }),
       });
 
@@ -90,7 +85,7 @@ const EducationEditor: React.FC = () => {
   useEffect(() => {
     if (!resumeInfo) return;
 
-    setFormState(resumeInfo.formattedContent.education);
+    setFormState(resumeInfo.formattedContent.job);
   }, [resumeInfo]);
 
   return (
@@ -114,8 +109,8 @@ const EducationEditor: React.FC = () => {
               >
                 <div className="flex w-full items-center justify-between">
                   <div className="flex space-x-2 text-sm font-semibold">
-                    <div>{item.school}</div>
-                    {item.major && <div>{item.major}</div>}
+                    <div>{item.company}</div>
+                    <div>{item.role}</div>
                     <div>{`${item.startDate} - ${item.endDate}`}</div>
                   </div>
                   <div className="hidden items-center space-x-2 group-hover:flex">
@@ -197,7 +192,7 @@ const EducationEditor: React.FC = () => {
           )}
         </Button>
       </div>
-      <AddEducationModal
+      <AddJobModal
         open={addItemModalOpen}
         onClose={() => setAddItemModalOpen(false)}
         onSubmit={(v) => {
@@ -206,8 +201,8 @@ const EducationEditor: React.FC = () => {
             {
               experience: v.experience || "",
               sort: prev.length === 0 ? 0 : prev[prev.length - 1].sort + 1,
-              school: v.school || "",
-              major: v.major || "",
+              company: v.company || "",
+              role: v.role || "",
               startDate: v.startDate || "",
               endDate: v.endDate || "",
             },
@@ -218,40 +213,40 @@ const EducationEditor: React.FC = () => {
   );
 };
 
-const AddEducationModal: React.FC<{
+const AddJobModal: React.FC<{
   open: boolean;
   onClose: () => void;
   onSubmit: (v: {
     experience: string;
-    school: string;
-    major: string;
+    company: string;
+    role: string;
     startDate: string;
     endDate: string;
   }) => void;
 }> = ({ open, onClose, onSubmit }) => {
   const { toast } = useToast();
 
-  const [educationExperience, setEducationExperience] = useState("");
-  const [educationBasicData, setEducationBasicData] = useState({
-    school: "",
-    major: "",
+  const [jobExperience, setJobExperience] = useState("");
+  const [jobBasicData, setJobBasicData] = useState({
+    company: "",
+    role: "",
     startDate: "",
     endDate: "",
   });
 
   const handleSubmit = () => {
     try {
-      if (!educationBasicData.school) {
-        throw new Error("学校不能为空");
+      if (!jobBasicData.company) {
+        throw new Error("公司不能为空");
       }
 
-      if (!educationBasicData.startDate || !educationBasicData.endDate) {
+      if (!jobBasicData.startDate || !jobBasicData.endDate) {
         throw new Error("开始时间和结束时间不能为空");
       }
 
       onSubmit({
-        experience: checkRichTextOutputIsNull(educationExperience),
-        ...educationBasicData,
+        experience: checkRichTextOutputIsNull(jobExperience),
+        ...jobBasicData,
       });
       onClose();
       clear();
@@ -266,10 +261,10 @@ const AddEducationModal: React.FC<{
   };
 
   const clear = () => {
-    setEducationExperience("");
-    setEducationBasicData({
-      school: "",
-      major: "",
+    setJobExperience("");
+    setJobBasicData({
+      company: "",
+      role: "",
       startDate: "",
       endDate: "",
     });
@@ -287,7 +282,7 @@ const AddEducationModal: React.FC<{
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>添加教育经历</DialogTitle>
+          <DialogTitle>添加工作经历</DialogTitle>
           <VisuallyHidden>
             <DialogDescription></DialogDescription>
           </VisuallyHidden>
@@ -296,29 +291,29 @@ const AddEducationModal: React.FC<{
           <div className="w-full space-y-5">
             <div className="grid grid-cols-1 gap-x-4 gap-y-5 overflow-hidden sm:grid-cols-2">
               <FormInput
-                value={educationBasicData.school}
+                value={jobBasicData.company}
                 onValueChange={(v) => {
-                  setEducationBasicData((prev) => ({
+                  setJobBasicData((prev) => ({
                     ...prev,
-                    school: v,
+                    company: v,
                   }));
                 }}
-                label="学校"
+                label="公司名称"
               />
               <FormInput
-                value={educationBasicData.major}
+                value={jobBasicData.role}
                 onValueChange={(v) => {
-                  setEducationBasicData((prev) => ({
+                  setJobBasicData((prev) => ({
                     ...prev,
-                    major: v,
+                    role: v,
                   }));
                 }}
-                label="专业"
+                label="职位"
               />
               <FormInput
-                value={educationBasicData.startDate}
+                value={jobBasicData.startDate}
                 onValueChange={(v) => {
-                  setEducationBasicData((prev) => ({
+                  setJobBasicData((prev) => ({
                     ...prev,
                     startDate: v,
                   }));
@@ -327,9 +322,9 @@ const AddEducationModal: React.FC<{
                 label="开始时间"
               />
               <FormInput
-                value={educationBasicData.endDate}
+                value={jobBasicData.endDate}
                 onValueChange={(v) => {
-                  setEducationBasicData((prev) => ({
+                  setJobBasicData((prev) => ({
                     ...prev,
                     endDate: v,
                   }));
@@ -341,8 +336,8 @@ const AddEducationModal: React.FC<{
             <div className="w-full space-y-1.5">
               <Label>经历</Label>
               <Editor
-                content={educationExperience}
-                onChange={setEducationExperience}
+                content={jobExperience}
+                onChange={setJobExperience}
               />
             </div>
           </div>
@@ -355,4 +350,4 @@ const AddEducationModal: React.FC<{
   );
 };
 
-export default EducationEditor;
+export default JobEditor;

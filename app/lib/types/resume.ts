@@ -14,6 +14,7 @@ export type ResumeData = {
   config: ResumeConfig;
   basic: ResumeBasicData[];
   education: EducationFormState[];
+  job: JobFormState[];
 };
 
 export type ResumeDetailResponse = {
@@ -36,6 +37,7 @@ export type FormattedResumeContent = {
     }
   >;
   education: EducationFormState[];
+  job: JobFormState[];
 };
 
 export type BasicDataFormState = {
@@ -50,10 +52,17 @@ export type BasicDataFormState = {
 export type EducationFormState = {
   experience: string;
   sort: number;
-  basicData: {
-    school: string;
-    major: string;
-    startDate: string;
-    endDate: string;
-  };
+  school: string;
+  major: string;
+  startDate: string;
+  endDate: string;
+};
+
+export type JobFormState = {
+  experience: string;
+  sort: number;
+  company: string;
+  role: string;
+  startDate: string;
+  endDate: string;
 };

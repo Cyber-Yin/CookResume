@@ -2,6 +2,7 @@
 
 import { useParams } from "@remix-run/react";
 import axios from "axios";
+import { motion } from "framer-motion";
 import { ArrowDown, ArrowUp, Loader2, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -26,6 +27,7 @@ import {
 } from "@/components/Select";
 import { useToast } from "@/components/Toaster/hooks";
 import { VisuallyHidden } from "@/components/VisuallyHidden";
+import { OPACITY_ANIMATION } from "@/lib/const/animation";
 import { BasicDataFormState } from "@/lib/types/resume";
 import { cn, formatError, generateRandomSalt, varifyInt } from "@/lib/utils";
 import { useFetchResume } from "@/routes/dashboard.resume.edit.$id/hooks/useFetchResume";
@@ -149,7 +151,10 @@ const BasicEditor: React.FC = () => {
       className="flex h-[calc(100vh-4rem)] w-full flex-col"
     >
       <ScrollArea className="h-[calc(100vh-7.5rem)]">
-        <div
+        <motion.div
+          variants={OPACITY_ANIMATION}
+          initial="hidden"
+          animate="visible"
           className={cn("grid gap-x-4 gap-y-5 overflow-hidden px-5 py-4", {
             "grid-cols-1": editorWidth <= 300,
             "grid-cols-2": editorWidth > 300 && editorWidth <= 900,
@@ -229,7 +234,7 @@ const BasicEditor: React.FC = () => {
               </SortTool>
             );
           })}
-        </div>
+        </motion.div>
       </ScrollArea>
       <div className="flex h-14 w-full items-center justify-end space-x-2 px-4">
         <Button
