@@ -1,6 +1,7 @@
 import BasicEditor from "../components/Editor/Basic";
 import EducationEditor from "../components/Editor/Education";
 import JobEditor from "../components/Editor/Job";
+import ProjectEditor from "../components/Editor/Project";
 import TemplateEditor from "../components/Editor/Template";
 
 export const DEFAULT_MENU_ITEMS = [
@@ -30,13 +31,13 @@ export const DEFAULT_MENU_ITEMS = [
     editor: JobEditor,
   },
   {
-    key: "skills",
+    key: "skill",
     label: "个人能力",
     editor: TemplateEditor,
   },
   {
-    key: "projects",
+    key: "project",
     label: "项目经验",
-    editor: TemplateEditor,
+    editor: ProjectEditor,
   },
 ];

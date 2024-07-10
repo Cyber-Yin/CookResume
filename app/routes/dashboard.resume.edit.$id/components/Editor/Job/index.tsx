@@ -1,5 +1,5 @@
-import { useParams } from "@remix-run/react";
-import axios from "axios";
+"use client";
+
 import { motion } from "framer-motion";
 import { ArrowDown, ArrowUp, Loader2, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -24,12 +24,11 @@ import { OPACITY_ANIMATION } from "@/lib/const/animation";
 import { JobFormState } from "@/lib/types/resume";
 import { checkRichTextOutputIsNull, formatError, varifyInt } from "@/lib/utils";
 import { useFetchResume } from "@/routes/dashboard.resume.edit.$id/hooks/useFetchResume";
+import { useSubmitResumeSection } from "@/routes/dashboard.resume.edit.$id/hooks/useSubmitResumeSection";
 
 const JobEditor: React.FC = () => {
-  const { toast } = useToast();
-  const { id } = useParams();
-  const { resumeInfo, refreshResume, resumeLoading, resumeValidating } =
-    useFetchResume();
+  const { resumeInfo, resumeLoading, resumeValidating } = useFetchResume();
+  const { handleFormSubmit, submitLoading } = useSubmitResumeSection();
 
   const [formState, setFormState] = useState<JobFormState[]>([]);
 
@@ -38,48 +37,10 @@ const JobEditor: React.FC = () => {
     [formState],
   );
 
-  const [submitLoading, setSubmitLoading] = useState(false);
   const [addItemModalOpen, setAddItemModalOpen] = useState(false);
 
   const handleSubmit = async () => {
-    try {
-      if (!id) {
-        throw new Error("简历 ID 不存在");
-      }
-
-      try {
-        varifyInt.parse(parseInt(id));
-      } catch (e) {
-        throw new Error("ID 非法");
-      }
-
-      setSubmitLoading(true);
-
-      await axios.post("/api/resume/update", {
-        resume_id: parseInt(id),
-        content: JSON.stringify({
-          ...resumeInfo!.rawContent,
-          job: formState,
-        }),
-      });
-
-      refreshResume();
-
-      toast({
-        title: "保存成功",
-        description: "简历已成功保存",
-        duration: 5000,
-      });
-    } catch (e) {
-      toast({
-        title: "保存失败",
-        description: formatError(e),
-        duration: 5000,
-        variant: "destructive",
-      });
-    } finally {
-      setSubmitLoading(false);
-    }
+    await handleFormSubmit(formState, "job");
   };
 
   useEffect(() => {
@@ -291,6 +252,7 @@ const AddJobModal: React.FC<{
           <div className="w-full space-y-5">
             <div className="grid grid-cols-1 gap-x-4 gap-y-5 overflow-hidden sm:grid-cols-2">
               <FormInput
+                required
                 value={jobBasicData.company}
                 onValueChange={(v) => {
                   setJobBasicData((prev) => ({
@@ -308,9 +270,10 @@ const AddJobModal: React.FC<{
                     role: v,
                   }));
                 }}
-                label="职位"
+                label="岗位"
               />
               <FormInput
+                required
                 value={jobBasicData.startDate}
                 onValueChange={(v) => {
                   setJobBasicData((prev) => ({
@@ -322,6 +285,7 @@ const AddJobModal: React.FC<{
                 label="开始时间"
               />
               <FormInput
+                required
                 value={jobBasicData.endDate}
                 onValueChange={(v) => {
                   setJobBasicData((prev) => ({

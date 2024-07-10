@@ -1,74 +1,31 @@
 "use client";
 
-import { useParams } from "@remix-run/react";
-import axios from "axios";
 import { motion } from "framer-motion";
 import { Check, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/Button";
 import { ScrollArea } from "@/components/ScrollArea";
-import { useToast } from "@/components/Toaster/hooks";
 import { FADE_IN_ANIMATION } from "@/lib/const/animation";
 import { RESUME_TEMPLATE } from "@/lib/const/resume-template";
-import { cn, formatError, varifyInt } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useFetchResume } from "@/routes/dashboard.resume.edit.$id/hooks/useFetchResume";
 import useResizeObserver from "@/routes/dashboard.resume.edit.$id/hooks/useResizeObserver";
+import { useSubmitResumeSection } from "@/routes/dashboard.resume.edit.$id/hooks/useSubmitResumeSection";
 
 const TemplateEditor: React.FC = () => {
-  const { toast } = useToast();
-  const { id } = useParams();
-  const { resumeInfo, refreshResume, resumeLoading, resumeValidating } =
-    useFetchResume();
+  const { resumeInfo, resumeLoading, resumeValidating } = useFetchResume();
+  const { handleFormSubmit, submitLoading } = useSubmitResumeSection();
 
   const [selectedTemplate, setSelectedTemplate] = useState(0);
 
   const { ref: editorRef, width: editorWidth } = useResizeObserver();
 
-  const [submitLoading, setSubmitLoading] = useState(false);
-
   const handleSubmit = async () => {
-    try {
-      if (!id) {
-        throw new Error("简历 ID 不存在");
-      }
-
-      try {
-        varifyInt.parse(parseInt(id));
-      } catch (e) {
-        throw new Error("ID 非法");
-      }
-
-      setSubmitLoading(true);
-
-      await axios.post("/api/resume/update", {
-        resume_id: parseInt(id),
-        content: JSON.stringify({
-          ...resumeInfo!.rawContent,
-          config: {
-            ...resumeInfo!.rawContent.config,
-            template: selectedTemplate,
-          },
-        }),
-      });
-
-      refreshResume();
-
-      toast({
-        title: "保存成功",
-        description: "简历已成功保存",
-        duration: 5000,
-      });
-    } catch (e) {
-      toast({
-        title: "保存失败",
-        description: formatError(e),
-        duration: 5000,
-        variant: "destructive",
-      });
-    } finally {
-      setSubmitLoading(false);
-    }
+    await handleFormSubmit(
+      { ...resumeInfo!.rawContent.config, template: selectedTemplate },
+      "config",
+    );
   };
 
   useEffect(() => {
