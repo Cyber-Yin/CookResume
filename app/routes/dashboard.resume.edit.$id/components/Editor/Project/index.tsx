@@ -21,16 +21,16 @@ import { ScrollArea } from "@/components/ScrollArea";
 import { useToast } from "@/components/Toaster/hooks";
 import { VisuallyHidden } from "@/components/VisuallyHidden";
 import { OPACITY_ANIMATION } from "@/lib/const/animation";
-import { EducationFormState } from "@/lib/types/resume";
-import { checkRichTextOutputIsNull, formatError } from "@/lib/utils";
+import { ProjectFormState } from "@/lib/types/resume";
+import { checkRichTextOutputIsNull, formatError, varifyInt } from "@/lib/utils";
 import { useFetchResume } from "@/routes/dashboard.resume.edit.$id/hooks/useFetchResume";
 import { useSubmitResumeSection } from "@/routes/dashboard.resume.edit.$id/hooks/useSubmitResumeSection";
 
-const EducationEditor: React.FC = () => {
+const ProjectEditor: React.FC = () => {
   const { resumeInfo, resumeLoading, resumeValidating } = useFetchResume();
   const { handleFormSubmit, submitLoading } = useSubmitResumeSection();
 
-  const [formState, setFormState] = useState<EducationFormState[]>([]);
+  const [formState, setFormState] = useState<ProjectFormState[]>([]);
 
   const sortedItems = useMemo(
     () => formState.sort((a, b) => a.sort - b.sort),
@@ -40,13 +40,13 @@ const EducationEditor: React.FC = () => {
   const [addItemModalOpen, setAddItemModalOpen] = useState(false);
 
   const handleSubmit = async () => {
-    await handleFormSubmit(formState, "education");
+    await handleFormSubmit(formState, "project");
   };
 
   useEffect(() => {
     if (!resumeInfo) return;
 
-    setFormState(resumeInfo.formattedContent.education);
+    setFormState(resumeInfo.formattedContent.project);
   }, [resumeInfo]);
 
   return (
@@ -70,9 +70,7 @@ const EducationEditor: React.FC = () => {
               >
                 <div className="flex w-full items-center justify-between">
                   <div className="flex space-x-2 text-sm font-semibold">
-                    <div>{item.school}</div>
-                    {item.major && <div>{item.major}</div>}
-                    <div>{`${item.startDate} - ${item.endDate}`}</div>
+                    <div>{item.name}</div>
                   </div>
                   <div className="hidden items-center space-x-2 group-hover:flex">
                     <ArrowUp
@@ -128,7 +126,7 @@ const EducationEditor: React.FC = () => {
                     />
                   </div>
                 </div>
-                {item.experience && <Viewer content={item.experience} />}
+                {item.description && <Viewer content={item.description} />}
               </div>
             ))}
           </motion.div>
@@ -140,7 +138,7 @@ const EducationEditor: React.FC = () => {
           onClick={() => setAddItemModalOpen(true)}
           className="border border-custom bg-custom text-custom hover:border-primary hover:text-primary"
         >
-          添加经历
+          添加项目
         </Button>
         <Button
           disabled={submitLoading || resumeLoading || resumeValidating}
@@ -153,19 +151,16 @@ const EducationEditor: React.FC = () => {
           )}
         </Button>
       </div>
-      <AddEducationModal
+      <AddProjectModal
         open={addItemModalOpen}
         onClose={() => setAddItemModalOpen(false)}
         onSubmit={(v) => {
           setFormState((prev) => [
             ...prev,
             {
-              experience: v.experience || "",
+              name: v.name || "",
+              description: v.description || "",
               sort: prev.length === 0 ? 0 : prev[prev.length - 1].sort + 1,
-              school: v.school || "",
-              major: v.major || "",
-              startDate: v.startDate || "",
-              endDate: v.endDate || "",
             },
           ]);
         }}
@@ -174,40 +169,31 @@ const EducationEditor: React.FC = () => {
   );
 };
 
-const AddEducationModal: React.FC<{
+const AddProjectModal: React.FC<{
   open: boolean;
   onClose: () => void;
-  onSubmit: (v: {
-    experience: string;
-    school: string;
-    major: string;
-    startDate: string;
-    endDate: string;
-  }) => void;
+  onSubmit: (v: { name: string; description: string }) => void;
 }> = ({ open, onClose, onSubmit }) => {
   const { toast } = useToast();
 
-  const [educationExperience, setEducationExperience] = useState("");
-  const [educationBasicData, setEducationBasicData] = useState({
-    school: "",
-    major: "",
-    startDate: "",
-    endDate: "",
-  });
+  const [projectName, setProjectName] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
 
   const handleSubmit = () => {
     try {
-      if (!educationBasicData.school) {
-        throw new Error("学校不能为空");
+      if (!projectName) {
+        throw new Error("项目名称不能为空");
       }
 
-      if (!educationBasicData.startDate || !educationBasicData.endDate) {
-        throw new Error("开始时间和结束时间不能为空");
+      const validDescription = checkRichTextOutputIsNull(projectDescription);
+
+      if (!validDescription) {
+        throw new Error("项目描述不能为空");
       }
 
       onSubmit({
-        experience: checkRichTextOutputIsNull(educationExperience),
-        ...educationBasicData,
+        name: projectName,
+        description: validDescription,
       });
       onClose();
       clear();
@@ -222,13 +208,8 @@ const AddEducationModal: React.FC<{
   };
 
   const clear = () => {
-    setEducationExperience("");
-    setEducationBasicData({
-      school: "",
-      major: "",
-      startDate: "",
-      endDate: "",
-    });
+    setProjectName("");
+    setProjectDescription("");
   };
 
   return (
@@ -243,65 +224,32 @@ const AddEducationModal: React.FC<{
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>添加教育经历</DialogTitle>
+          <DialogTitle>添加项目经验</DialogTitle>
           <VisuallyHidden>
             <DialogDescription></DialogDescription>
           </VisuallyHidden>
         </DialogHeader>
         <ScrollArea className="my-4 h-[calc(50vh-2rem)] w-full">
           <div className="w-full space-y-5">
-            <div className="grid grid-cols-1 gap-x-4 gap-y-5 overflow-hidden sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-x-4 gap-y-5 overflow-hidden">
               <FormInput
                 required
-                value={educationBasicData.school}
+                value={projectName}
                 onValueChange={(v) => {
-                  setEducationBasicData((prev) => ({
-                    ...prev,
-                    school: v,
-                  }));
+                  setProjectName(v);
                 }}
-                label="学校"
-              />
-              <FormInput
-                value={educationBasicData.major}
-                onValueChange={(v) => {
-                  setEducationBasicData((prev) => ({
-                    ...prev,
-                    major: v,
-                  }));
-                }}
-                label="专业"
-              />
-              <FormInput
-                required
-                value={educationBasicData.startDate}
-                onValueChange={(v) => {
-                  setEducationBasicData((prev) => ({
-                    ...prev,
-                    startDate: v,
-                  }));
-                }}
-                placeholder="格式：2022.01.01"
-                label="开始时间"
-              />
-              <FormInput
-                required
-                value={educationBasicData.endDate}
-                onValueChange={(v) => {
-                  setEducationBasicData((prev) => ({
-                    ...prev,
-                    endDate: v,
-                  }));
-                }}
-                placeholder="格式：2022.01.01"
-                label="结束时间"
+                label="项目名称"
               />
             </div>
             <div className="w-full space-y-1.5">
-              <Label>经历</Label>
+              <div className="inline-flex items-center space-x-1">
+                <Label>项目描述</Label>
+                <div className="text-xs text-danger-light">*</div>
+              </div>
+
               <Editor
-                content={educationExperience}
-                onChange={setEducationExperience}
+                content={projectDescription}
+                onChange={setProjectDescription}
               />
             </div>
           </div>
@@ -314,4 +262,4 @@ const AddEducationModal: React.FC<{
   );
 };
 
-export default EducationEditor;
+export default ProjectEditor;

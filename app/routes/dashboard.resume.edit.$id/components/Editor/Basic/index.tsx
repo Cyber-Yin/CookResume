@@ -1,7 +1,5 @@
 "use client";
 
-import { useParams } from "@remix-run/react";
-import axios from "axios";
 import { motion } from "framer-motion";
 import { ArrowDown, ArrowUp, Loader2, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -29,9 +27,10 @@ import { useToast } from "@/components/Toaster/hooks";
 import { VisuallyHidden } from "@/components/VisuallyHidden";
 import { OPACITY_ANIMATION } from "@/lib/const/animation";
 import { BasicDataFormState } from "@/lib/types/resume";
-import { cn, formatError, generateRandomSalt, varifyInt } from "@/lib/utils";
+import { cn, formatError, generateRandomSalt } from "@/lib/utils";
 import { useFetchResume } from "@/routes/dashboard.resume.edit.$id/hooks/useFetchResume";
 import useResizeObserver from "@/routes/dashboard.resume.edit.$id/hooks/useResizeObserver";
+import { useSubmitResumeSection } from "@/routes/dashboard.resume.edit.$id/hooks/useSubmitResumeSection";
 
 const PlaceholderMap = [
   {
@@ -71,10 +70,9 @@ const CheckType = (key: string) => {
 
 const BasicEditor: React.FC = () => {
   const { toast } = useToast();
-  const { id } = useParams();
 
-  const { resumeInfo, refreshResume, resumeLoading, resumeValidating } =
-    useFetchResume();
+  const { resumeInfo, resumeLoading, resumeValidating } = useFetchResume();
+  const { handleFormSubmit, submitLoading } = useSubmitResumeSection();
 
   const [formState, setFormState] = useState<BasicDataFormState>({});
 
@@ -88,45 +86,17 @@ const BasicEditor: React.FC = () => {
 
   const { ref: editorRef, width: editorWidth } = useResizeObserver();
 
-  const [submitLoading, setSubmitLoading] = useState(false);
   const [addItemModalOpen, setAddItemModalOpen] = useState(false);
 
   const handleSubmit = async () => {
     try {
-      if (!id) {
-        throw new Error("简历 ID 不存在");
+      if (!formState.name.value) {
+        throw new Error("姓名不能为空");
       }
 
-      try {
-        varifyInt.parse(parseInt(id));
-      } catch (e) {
-        throw new Error("ID 非法");
+      if (!formState.age.value) {
+        throw new Error("年龄不能为空");
       }
-
-      const updateData = Object.entries(formState).map(([key, value]) => ({
-        key,
-        label: value.label,
-        sort: value.sort,
-        value: value.value,
-      }));
-
-      setSubmitLoading(true);
-
-      await axios.post("/api/resume/update", {
-        resume_id: parseInt(id),
-        content: JSON.stringify({
-          ...resumeInfo!.rawContent,
-          basic: updateData,
-        }),
-      });
-
-      refreshResume();
-
-      toast({
-        title: "保存成功",
-        description: "简历已成功保存",
-        duration: 5000,
-      });
     } catch (e) {
       toast({
         title: "保存失败",
@@ -134,9 +104,18 @@ const BasicEditor: React.FC = () => {
         duration: 5000,
         variant: "destructive",
       });
-    } finally {
-      setSubmitLoading(false);
+
+      return;
     }
+
+    const updateData = Object.entries(formState).map(([key, value]) => ({
+      key,
+      label: value.label,
+      sort: value.sort,
+      value: value.value,
+    }));
+
+    await handleFormSubmit(updateData, "basic");
   };
 
   useEffect(() => {
@@ -175,7 +154,10 @@ const BasicEditor: React.FC = () => {
                   setFormState={setFormState}
                 >
                   <div className="w-full space-y-1.5">
-                    <Label>性别</Label>
+                    <div className="inline-flex items-center space-x-1">
+                      <Label>性别</Label>
+                      <div className="text-xs text-danger-light">*</div>
+                    </div>
                     <Select
                       value={formState.gender.value}
                       onValueChange={(v) => {
@@ -214,6 +196,7 @@ const BasicEditor: React.FC = () => {
                 key={item.key}
               >
                 <FormInput
+                  required={["name", "age"].includes(item.key)}
                   label={item.label}
                   placeholder={placeholder || ""}
                   type={inputType}

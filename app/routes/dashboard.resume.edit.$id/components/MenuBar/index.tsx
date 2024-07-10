@@ -21,7 +21,7 @@ const MenuBar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const tab = useMemo(() => {
-    return searchParams.get("tab") || "basic";
+    return searchParams.get("tab") || "resume_setting";
   }, [searchParams]);
 
   return (

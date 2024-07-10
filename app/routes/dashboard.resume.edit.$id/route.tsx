@@ -24,7 +24,7 @@ const DesktopPanel: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const tab = useMemo(() => {
-    return searchParams.get("tab") || "basic";
+    return searchParams.get("tab") || "resume_setting";
   }, [searchParams]);
 
   const EditorComponent = useMemo(() => {
