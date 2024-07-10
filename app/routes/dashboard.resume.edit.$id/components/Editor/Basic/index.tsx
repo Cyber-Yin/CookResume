@@ -410,6 +410,7 @@ const AddItemModal: React.FC<{
         </DialogHeader>
         <div className="my-4 space-y-4">
           <FormInput
+            required
             label="标签"
             placeholder="请输入标签"
             value={label}
@@ -418,6 +419,7 @@ const AddItemModal: React.FC<{
             }}
           />
           <FormInput
+            required
             label="值"
             placeholder="请输入值"
             value={value}

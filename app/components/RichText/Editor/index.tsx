@@ -1,5 +1,8 @@
+"use client";
+
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { useEffect, useRef } from "react";
 
 import EditorToolbar from "../Toolbar";
 
@@ -14,9 +17,26 @@ const Editor = ({ content, placeholder, onChange }: EditorProps) => {
     extensions: [StarterKit],
     content: content,
     onUpdate: ({ editor }) => {
+      if (!rendered.current) {
+        rendered.current = true;
+      }
+
       onChange(editor.getHTML());
     },
   });
+
+  const rendered = useRef(false);
+
+  // BUG: not render content when farther component uses 'useEffect' hook to set content
+  // FIX: when content is set, editor will render the content, and only once
+  useEffect(() => {
+    if (rendered.current) return;
+
+    if (!editor || !content) return;
+
+    rendered.current = true;
+    editor.commands.setContent(content);
+  }, [content]);
 
   if (!editor) return <></>;
 
