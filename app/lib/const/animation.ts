@@ -8,3 +8,8 @@ export const FADE_IN_ANIMATION = {
     },
   }),
 };
+
+export const OPACITY_ANIMATION = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+};

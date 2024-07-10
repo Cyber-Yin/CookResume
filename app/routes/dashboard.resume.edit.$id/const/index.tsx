@@ -1,5 +1,6 @@
 import BasicEditor from "../components/Editor/Basic";
 import EducationEditor from "../components/Editor/Education";
+import JobEditor from "../components/Editor/Job";
 import TemplateEditor from "../components/Editor/Template";
 
 export const DEFAULT_MENU_ITEMS = [
@@ -26,7 +27,7 @@ export const DEFAULT_MENU_ITEMS = [
   {
     key: "experience",
     label: "工作经历",
-    editor: TemplateEditor,
+    editor: JobEditor,
   },
   {
     key: "skills",
