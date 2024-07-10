@@ -16,6 +16,7 @@ export type ResumeData = {
   education: EducationFormState[];
   job: JobFormState[];
   project: ProjectFormState[];
+  skill: string;
 };
 
 export type ResumeDetailResponse = {
@@ -40,6 +41,7 @@ export type FormattedResumeContent = {
   education: EducationFormState[];
   job: JobFormState[];
   project: ProjectFormState[];
+  skill: string;
 };
 
 export type BasicDataFormState = {

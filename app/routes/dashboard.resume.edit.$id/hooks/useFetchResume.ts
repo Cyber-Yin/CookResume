@@ -35,6 +35,7 @@ export const useFetchResume = () => {
           education: jsonContent.education || [],
           job: jsonContent.job || [],
           project: jsonContent.project || [],
+          skill: jsonContent.skill || "",
         };
 
         return {
