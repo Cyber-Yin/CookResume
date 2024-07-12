@@ -31,6 +31,7 @@ Input.displayName = "Input";
 
 interface FormInputProps extends InputProps {
   label: string;
+  labelHidden?: boolean;
   required?: boolean;
   placeholder?: string;
   description?: string;
@@ -43,6 +44,7 @@ const FormInput = ({
   onValueChange,
   required,
   label,
+  labelHidden,
   placeholder,
   description,
   value,
@@ -53,13 +55,17 @@ const FormInput = ({
 
   return (
     <div className="space-y-1.5">
-      {required ? (
-        <div className="inline-flex items-center space-x-1">
-          <Label htmlFor={id}>{label}</Label>
-          <div className="text-xs text-danger-light">*</div>
-        </div>
-      ) : (
-        <Label htmlFor={id}>{label}</Label>
+      {!labelHidden && (
+        <>
+          {required ? (
+            <div className="inline-flex items-center space-x-1">
+              <Label htmlFor={id}>{label}</Label>
+              <div className="text-xs text-danger-light">*</div>
+            </div>
+          ) : (
+            <Label htmlFor={id}>{label}</Label>
+          )}
+        </>
       )}
 
       <div className="relative">
