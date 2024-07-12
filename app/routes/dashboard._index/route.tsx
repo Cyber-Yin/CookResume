@@ -1,8 +1,6 @@
 import { LoaderFunction, json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { motion } from "framer-motion";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/Avatar";
 import { checkUserIsLogin } from "@/lib/services/auth.server";
 import DatabaseInstance from "@/lib/services/prisma.server";
 import { formatError } from "@/lib/utils";
@@ -88,16 +86,8 @@ export default function DashboardIndexPage() {
   return (
     <>
       <main className="pt-16">
-        <div className="mx-auto w-full max-w-screen-lg space-y-6 px-4 py-8 sm:px-0">
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src={user.avatar || ""} />
-              <AvatarFallback>
-                {user.user_name.slice(0, 1).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <h1 className="text-2xl font-bold">你好，{user.user_name}！</h1>
-          </div>
+        <div className="mx-auto w-full max-w-screen-lg space-y-6 px-4 py-8">
+          <h1 className="text-2xl font-bold">你好，{user.user_name}！</h1>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             <CreateResumeCard />
             {resume.map((item, index) => (
