@@ -1,16 +1,17 @@
 import { LoaderFunction, redirect } from "@remix-run/node";
 import { json, useNavigate } from "@remix-run/react";
 import axios from "axios";
-import { motion } from "framer-motion";
 import { sha256 } from "js-sha256";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/Button";
 import { FormInput, PasswordInput } from "@/components/Input";
+import PageCard from "@/components/PageCard";
 import { useToast } from "@/components/Toaster/hooks";
 import { checkUserIsLogin } from "@/lib/services/auth.server";
-import { formatError, sleep } from "@/lib/utils";
+import { formatError } from "@/lib/utils";
+import { FormValidator } from "@/lib/utils/form-validator";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const { isLogin } = await checkUserIsLogin(request);
@@ -30,46 +31,57 @@ export default function SignInPage() {
     data: {
       account: "",
       password: "",
-      rememberMe: false,
     },
     error: {
       account: "",
       password: "",
-      rememberMe: "",
     },
   });
+
+  const canLogin = useMemo(() => {
+    const errorArray = Object.values(formState.error);
+
+    return errorArray.every((error) => !error);
+  }, [formState.error]);
 
   const [loginLoading, setLoginLoading] = useState(false);
 
   const login = async () => {
-    if (!formState.data.account) {
-      setFormState((prev) => ({
-        data: prev.data,
-        error: {
-          ...prev.error,
-          account: "账号不能为空",
-        },
-      }));
+    const validators = [
+      {
+        validator: () =>
+          FormValidator.signInAccountValidator(formState.data.account),
+        field: "account",
+      },
+      {
+        validator: () =>
+          FormValidator.signInPasswordValidator(formState.data.password),
+        field: "password",
+      },
+    ];
 
-      return;
-    }
+    let success = true;
 
-    if (!formState.data.password) {
-      setFormState((prev) => ({
-        data: prev.data,
-        error: {
-          ...prev.error,
-          password: "密码不能为空",
-        },
-      }));
+    validators.forEach((validator) => {
+      try {
+        validator.validator();
+      } catch (e) {
+        setFormState((prev) => ({
+          ...prev,
+          error: { ...prev.error, [validator.field]: formatError(e) },
+        }));
+        success = false;
+      }
+    });
 
+    if (!success) {
       return;
     }
 
     try {
       setLoginLoading(true);
 
-      await axios.post("/api/sign-in", {
+      await axios.post("/api/account/sign-in", {
         account: formState.data.account,
         password: sha256(formState.data.password),
       });
@@ -88,33 +100,28 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="mx-auto flex h-screen min-h-screen w-full items-center sm:h-auto sm:w-[500px] sm:py-20">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex h-full w-full flex-col items-center justify-center space-y-12 bg-custom px-4 py-16 sm:h-auto sm:rounded-lg sm:border-t-4 sm:border-t-primary sm:shadow-lg"
-      >
-        <h1 className="text-2xl font-bold">登录酷客简历</h1>
-        <div className="w-full space-y-4 sm:max-w-[360px]">
-          <div className="w-full space-y-3">
-            <FormInput
-              label="账号"
-              placeholder="请输入用户名 / 邮箱"
-              value={formState.data.account}
-              error={formState.error.account}
-              onValueChange={(v, e) => {
-                setFormState((prev) => ({
-                  data: {
-                    ...prev.data,
-                    account: v,
-                  },
-                  error: {
-                    ...prev.error,
-                    account: e,
-                  },
-                }));
-              }}
-            />
+    <PageCard title="登录酷客简历">
+      <div className="w-full space-y-6 sm:max-w-[360px]">
+        <div className="w-full space-y-4">
+          <FormInput
+            label="账号"
+            placeholder="请输入用户名 / 邮箱"
+            value={formState.data.account}
+            error={formState.error.account}
+            onValueChange={(v, e) => {
+              setFormState((prev) => ({
+                data: {
+                  ...prev.data,
+                  account: v,
+                },
+                error: {
+                  ...prev.error,
+                  account: e,
+                },
+              }));
+            }}
+          />
+          <div className="relative w-full">
             <PasswordInput
               label="密码"
               placeholder="请输入密码"
@@ -133,52 +140,31 @@ export default function SignInPage() {
                 }));
               }}
             />
-          </div>
-          <div className="flex w-full items-center justify-between">
-            {/* <CustomCheckbox
-              props={{
-                isSelected: formState.data.rememberMe,
-                onValueChange: (isSelected) => {
-                  setFormState((prev) => ({
-                    data: {
-                      ...prev.data,
-                      rememberMe: isSelected,
-                    },
-                    error: prev.error,
-                  }));
-                },
-              }}
+            <div
+              onClick={() => navigate("/reset-password")}
+              className="absolute right-0 top-1.5 cursor-pointer text-xs text-primary hover:underline"
             >
-              记住我
-            </CustomCheckbox> */}
-            <div className="cursor-pointer text-right text-xs text-primary">
               找回密码
             </div>
           </div>
-          <div className="flex w-full flex-col items-center space-y-2">
-            <Button
-              disabled={loginLoading}
-              className="w-full sm:max-w-[360px]"
-              onClick={() => login()}
-            >
-              {loginLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "登录"
-              )}
-            </Button>
-          </div>
         </div>
-        <div className="text-sm">
-          没有账号？
-          <span
-            onClick={() => navigate("/sign-up")}
-            className="cursor-pointer text-primary"
-          >
-            注册
-          </span>
-        </div>
-      </motion.div>
-    </div>
+        <Button
+          disabled={!canLogin || loginLoading}
+          className="w-full sm:max-w-[360px]"
+          onClick={() => login()}
+        >
+          {loginLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "登录"}
+        </Button>
+      </div>
+      <div className="text-sm">
+        没有账号？
+        <span
+          onClick={() => navigate("/sign-up")}
+          className="cursor-pointer text-primary hover:underline"
+        >
+          注册
+        </span>
+      </div>
+    </PageCard>
   );
 }
