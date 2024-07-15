@@ -74,3 +74,43 @@ export const checkRichTextOutputIsNull = (value: string) => {
 
   return value;
 };
+
+interface SortableItem {
+  sort: number;
+}
+
+export const swapItems = <T extends SortableItem>(
+  currentKey: string,
+  targetKey: string,
+  setFormState: React.Dispatch<
+    React.SetStateAction<{
+      [key: string]: T;
+    }>
+  >,
+) => {
+  setFormState((prev) => {
+    if (!currentKey || !targetKey) return prev;
+
+    const currentItem = prev[currentKey];
+    const targetItem = prev[targetKey];
+
+    if (!currentItem || !targetItem) return prev;
+
+    return {
+      ...prev,
+      [currentKey]: {
+        ...currentItem,
+        sort: targetItem.sort,
+      },
+      [targetKey]: {
+        ...targetItem,
+        sort: currentItem.sort,
+      },
+    };
+  });
+};
+
+export const generateVerificationCode = (): string => {
+  const code = Math.floor(100000 + Math.random() * 900000);
+  return code.toString();
+};

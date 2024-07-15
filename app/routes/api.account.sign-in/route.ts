@@ -1,6 +1,7 @@
 import { ActionFunction, json } from "@remix-run/node";
 import { z } from "zod";
 
+import { RedisKeyGenerator } from "@/lib/const/redis-key";
 import DatabaseInstance from "@/lib/services/prisma.server";
 import RedisInstance from "@/lib/services/redis.server";
 import { createUserSession } from "@/lib/services/session.server";
@@ -51,7 +52,7 @@ export const action: ActionFunction = async ({ request }) => {
     const salt = generateRandomSalt();
 
     await RedisInstance.set(
-      `user:${user.id}:token`,
+      RedisKeyGenerator.generateUserToken(user.id),
       salt,
       "EX",
       60 * 60 * 24 * 7,

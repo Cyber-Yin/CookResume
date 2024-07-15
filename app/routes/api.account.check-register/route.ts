@@ -2,7 +2,6 @@ import { ActionFunction, json } from "@remix-run/node";
 import { z } from "zod";
 
 import DatabaseInstance from "@/lib/services/prisma.server";
-import RedisInstance from "@/lib/services/redis.server";
 import { formatError, validatePayload } from "@/lib/utils";
 
 const RequestSchema = z.object({
@@ -18,16 +17,6 @@ export const action: ActionFunction = async ({ request }) => {
 
     validatePayload(RequestSchema, data);
 
-    const cache = await RedisInstance.get(
-      `check_register:${data.type}:${data.value}`,
-    );
-
-    if (cache) {
-      return json({
-        registered: true,
-      });
-    }
-
     const user = await DatabaseInstance.user.findUnique({
       select: {
         id: true,
@@ -41,16 +30,6 @@ export const action: ActionFunction = async ({ request }) => {
               user_name: data.value,
             },
     });
-
-    if (user) {
-      RedisInstance.set(
-        `check_register:${data.type}:${data.value}`,
-        user.id,
-        "EX",
-        60 * 5,
-        "NX",
-      );
-    }
 
     return json({
       registered: user ? true : false,
