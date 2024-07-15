@@ -22,8 +22,12 @@ const Header: React.FC<{
 
   return (
     <>
-      <header className="fixed z-20 flex h-16 w-full items-center justify-between bg-custom px-4 shadow sm:px-6">
-        <h1 className="text-xl font-bold">酷客简历</h1>
+      <header className="fixed z-20 flex h-16 w-full items-center justify-between bg-custom px-4 drop-shadow sm:px-6">
+        <img
+          className="h-12 w-12 cursor-pointer"
+          src="/icons/logo.svg"
+          alt="logo"
+        />
         {user ? (
           <Sheet>
             <SheetTrigger asChild>
@@ -55,7 +59,7 @@ const Header: React.FC<{
               <hr className="my-4 border-t-[1.5px] border-custom" />
               <div className="space-y-1 text-custom">
                 <div
-                  onClick={() => {}}
+                  onClick={() => navigate("/dashboard/account")}
                   className="flex cursor-pointer items-center space-x-2 rounded-md px-4 py-1.5 transition-colors hover:bg-custom-hover"
                 >
                   <User className="h-4 w-4" />

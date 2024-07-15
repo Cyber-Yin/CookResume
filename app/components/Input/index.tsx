@@ -30,8 +30,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 Input.displayName = "Input";
 
 interface FormInputProps extends InputProps {
-  label: string;
-  labelHidden?: boolean;
+  label?: string;
   required?: boolean;
   placeholder?: string;
   description?: string;
@@ -44,7 +43,6 @@ const FormInput = ({
   onValueChange,
   required,
   label,
-  labelHidden,
   placeholder,
   description,
   value,
@@ -54,8 +52,8 @@ const FormInput = ({
   const id = useId();
 
   return (
-    <div className="space-y-1.5">
-      {!labelHidden && (
+    <div className="w-full space-y-1.5">
+      {label && (
         <>
           {required ? (
             <div className="inline-flex items-center space-x-1">
@@ -68,14 +66,14 @@ const FormInput = ({
         </>
       )}
 
-      <div className="relative">
+      <div className="relative w-full">
         <Input
           {...rest}
           value={value}
           onChange={(e) => onValueChange(e.target.value, "")}
           placeholder={placeholder}
           id={id}
-          className={cn("pr-7", {
+          className={cn("pr-7", rest.className, {
             "border-danger-light": error,
           })}
         />
