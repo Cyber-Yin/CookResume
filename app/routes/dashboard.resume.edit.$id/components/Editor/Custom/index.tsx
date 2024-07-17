@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/Button";
+import { FormInput } from "@/components/Input";
 import { Label } from "@/components/Label";
 import Editor from "@/components/RichText/Editor";
 import { ScrollArea } from "@/components/ScrollArea";
@@ -15,18 +16,21 @@ import { useFetchResume } from "@/routes/dashboard.resume.edit.$id/hooks/useFetc
 import { useResumeContent } from "@/routes/dashboard.resume.edit.$id/hooks/useResumeContent";
 import { useSubmitResumeSection } from "@/routes/dashboard.resume.edit.$id/hooks/useSubmitResumeSection";
 
-const SkillEditor: React.FC = () => {
+const CustomEditor: React.FC = () => {
   const { resumeInfo, resumeLoading, resumeValidating } = useFetchResume();
   const { handleFormSubmit, submitLoading } = useSubmitResumeSection();
   const { content, setContent } = useResumeContent();
   const isFirstRender = useIsFirstRender();
 
-  const [formState, setFormState] = useState("");
+  const [formState, setFormState] = useState({
+    label: "",
+    value: "",
+  });
 
   useEffect(() => {
     if (!resumeInfo) return;
 
-    setFormState(resumeInfo.content.skill);
+    setFormState(resumeInfo.content.custom);
   }, [resumeInfo]);
 
   useEffect(() => {
@@ -34,7 +38,10 @@ const SkillEditor: React.FC = () => {
 
     setContent({
       ...content,
-      skill: checkRichTextOutputIsNull(formState),
+      custom: {
+        label: formState.label,
+        value: checkRichTextOutputIsNull(formState.value),
+      },
     });
   }, [formState]);
 
@@ -42,7 +49,10 @@ const SkillEditor: React.FC = () => {
     await handleFormSubmit({
       content: JSON.stringify({
         ...resumeInfo!.content,
-        skill: checkRichTextOutputIsNull(formState),
+        custom: {
+          label: formState.label,
+          value: checkRichTextOutputIsNull(formState.value),
+        },
       }),
     });
   };
@@ -56,11 +66,18 @@ const SkillEditor: React.FC = () => {
           animate="visible"
           className="flex w-full flex-col space-y-4 px-5 py-4"
         >
+          <FormInput
+            label="标签"
+            value={formState.label}
+            onValueChange={(value) =>
+              setFormState({ ...formState, label: value })
+            }
+          />
           <div className="w-full space-y-1.5">
-            <Label>个人能力</Label>
+            <Label>内容</Label>
             <Editor
-              content={formState}
-              onChange={setFormState}
+              content={formState.value}
+              onChange={(value) => setFormState({ ...formState, value })}
             />
           </div>
         </motion.div>
@@ -81,4 +98,4 @@ const SkillEditor: React.FC = () => {
   );
 };
 
-export default SkillEditor;
+export default CustomEditor;

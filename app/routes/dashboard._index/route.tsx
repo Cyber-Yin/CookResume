@@ -36,6 +36,7 @@ export const loader: LoaderFunction = async ({ request }) => {
         id: true,
         title: true,
         content: true,
+        template: true,
         published: true,
         created_at: true,
         updated_at: true,
@@ -77,6 +78,7 @@ export default function DashboardIndexPage() {
       id: number;
       title: string;
       content: string;
+      template: number;
       published: number;
       created_at: number;
       updated_at: number;

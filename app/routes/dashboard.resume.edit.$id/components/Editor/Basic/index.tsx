@@ -1,7 +1,23 @@
 "use client";
 
+import {
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  rectSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { useIsFirstRender } from "@uidotdev/usehooks";
 import { motion } from "framer-motion";
-import { ArrowDown, ArrowUp, Loader2, Trash2 } from "lucide-react";
+import { Loader2, Menu, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/Button";
@@ -27,9 +43,16 @@ import { useToast } from "@/components/Toaster/hooks";
 import { VisuallyHidden } from "@/components/VisuallyHidden";
 import { OPACITY_ANIMATION } from "@/lib/const/animation";
 import { BasicDataFormState } from "@/lib/types/resume";
-import { cn, formatError, generateRandomSalt } from "@/lib/utils";
+import {
+  cn,
+  formatError,
+  generateRandomSalt,
+  handleEditorSortEnd,
+} from "@/lib/utils";
+import { formatResumeBasicData } from "@/lib/utils/resume";
 import { useFetchResume } from "@/routes/dashboard.resume.edit.$id/hooks/useFetchResume";
 import useResizeObserver from "@/routes/dashboard.resume.edit.$id/hooks/useResizeObserver";
+import { useResumeContent } from "@/routes/dashboard.resume.edit.$id/hooks/useResumeContent";
 import { useSubmitResumeSection } from "@/routes/dashboard.resume.edit.$id/hooks/useSubmitResumeSection";
 
 const PlaceholderMap = [
@@ -68,13 +91,223 @@ const CheckType = (key: string) => {
   return "text";
 };
 
+type SortableItemProps = {
+  item: {
+    isCustom: boolean;
+    label: string;
+    sort: number;
+    value: string;
+    key: string;
+  };
+  formState: BasicDataFormState;
+  setFormState: React.Dispatch<React.SetStateAction<BasicDataFormState>>;
+};
+
+type SortableListProps = {
+  editorWidth: number;
+  items: SortableItemProps["item"][];
+  formState: BasicDataFormState;
+  setFormState: React.Dispatch<React.SetStateAction<BasicDataFormState>>;
+  onSortEnd: (event: DragEndEvent) => void;
+};
+
+const SortableItem = ({ item, formState, setFormState }: SortableItemProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.key });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+    height: isDragging ? undefined : "",
+  };
+
+  const placeholder = PlaceholderMap.find(
+    (i) => i.key === item.key,
+  )?.placeholder;
+
+  const inputType = CheckType(item.key);
+
+  if (item.key === "gender") {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        className="relative w-full"
+      >
+        <div className="w-full space-y-1.5">
+          <div className="inline-flex items-center space-x-1">
+            <Label>性别</Label>
+            <div className="text-xs text-danger-light">*</div>
+          </div>
+          <Select
+            value={formState.gender.value}
+            onValueChange={(v) => {
+              setFormState((prev) => ({
+                ...prev,
+                gender: {
+                  ...prev.gender,
+                  value: v,
+                },
+              }));
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue
+                placeholder="请选择性别"
+                className="text-custom-secondary placeholder:text-custom-secondary"
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="男">男</SelectItem>
+              <SelectItem value="女">女</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="absolute right-0 top-1.5 flex items-center space-x-1">
+          <div
+            {...attributes}
+            {...listeners}
+            className="cursor-grab"
+          >
+            <Menu className="h-3.5 w-3.5" />
+          </div>
+          {item.isCustom && (
+            <Trash2
+              onClick={() => {
+                setFormState((prev) => {
+                  const { [item.key]: _, ...rest } = prev;
+                  return rest;
+                });
+              }}
+              className="h-3.5 w-3.5 cursor-pointer text-danger-light"
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="relative w-full"
+    >
+      <FormInput
+        required={["name", "age"].includes(item.key)}
+        label={item.label}
+        placeholder={placeholder || ""}
+        type={inputType}
+        step={inputType === "number" ? 1 : undefined}
+        min={item.key === "age" ? 1 : undefined}
+        max={item.key === "age" ? 100 : undefined}
+        value={item.value}
+        onValueChange={(v, e) => {
+          setFormState((prev) => ({
+            ...prev,
+            [item.key]: {
+              ...prev[item.key],
+              value: v,
+            },
+          }));
+        }}
+      />
+      <div className="absolute right-0 top-1.5 flex items-center space-x-1">
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab"
+        >
+          <Menu className="h-3.5 w-3.5" />
+        </div>
+        {item.isCustom && (
+          <Trash2
+            onClick={() => {
+              setFormState((prev) => {
+                const { [item.key]: _, ...rest } = prev;
+                return rest;
+              });
+            }}
+            className="h-3.5 w-3.5 cursor-pointer text-danger-light"
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
+const SortableList = ({
+  editorWidth,
+  items,
+  formState,
+  setFormState,
+  onSortEnd,
+}: SortableListProps) => {
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor),
+  );
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={onSortEnd}
+    >
+      <SortableContext
+        items={items.map((item) => item.key)}
+        strategy={rectSortingStrategy}
+      >
+        <motion.div
+          variants={OPACITY_ANIMATION}
+          initial="hidden"
+          animate="visible"
+          className={cn("grid gap-x-4 gap-y-5 overflow-hidden px-5 py-4", {
+            "grid-cols-1": editorWidth <= 300,
+            "grid-cols-2": editorWidth > 300 && editorWidth <= 900,
+            "grid-cols-3": editorWidth > 900,
+          })}
+        >
+          {items.map((item) => (
+            <SortableItem
+              key={item.key}
+              item={item}
+              formState={formState}
+              setFormState={setFormState}
+            />
+          ))}
+        </motion.div>
+      </SortableContext>
+    </DndContext>
+  );
+};
+
 const BasicEditor: React.FC = () => {
   const { toast } = useToast();
 
   const { resumeInfo, resumeLoading, resumeValidating } = useFetchResume();
   const { handleFormSubmit, submitLoading } = useSubmitResumeSection();
+  const { content, setContent } = useResumeContent();
+
+  const isFirstRender = useIsFirstRender();
 
   const [formState, setFormState] = useState<BasicDataFormState>({});
+
+  useEffect(() => {
+    if (!resumeInfo) return;
+
+    const formattedBasicContent = formatResumeBasicData(
+      resumeInfo.content.basic,
+    );
+
+    setFormState(formattedBasicContent);
+  }, [resumeInfo]);
 
   const sortedItems = useMemo(
     () =>
@@ -83,6 +316,20 @@ const BasicEditor: React.FC = () => {
         .sort((a, b) => a.sort - b.sort),
     [formState],
   );
+
+  useEffect(() => {
+    if (isFirstRender) return;
+
+    setContent({
+      ...content,
+      basic: sortedItems.map((item) => ({
+        key: item.key,
+        label: item.label,
+        sort: item.sort,
+        value: item.value,
+      })),
+    });
+  }, [sortedItems]);
 
   const { ref: editorRef, width: editorWidth } = useResizeObserver();
 
@@ -108,21 +355,18 @@ const BasicEditor: React.FC = () => {
       return;
     }
 
-    const updateData = Object.entries(formState).map(([key, value]) => ({
-      key,
-      label: value.label,
-      sort: value.sort,
-      value: value.value,
-    }));
-
-    await handleFormSubmit(updateData, "basic");
+    await handleFormSubmit({
+      content: JSON.stringify({
+        ...resumeInfo!.content,
+        basic: sortedItems.map((item) => ({
+          key: item.key,
+          label: item.label,
+          sort: item.sort,
+          value: item.value,
+        })),
+      }),
+    });
   };
-
-  useEffect(() => {
-    if (!resumeInfo) return;
-
-    setFormState(resumeInfo.formattedContent.basic);
-  }, [resumeInfo]);
 
   return (
     <div
@@ -130,100 +374,21 @@ const BasicEditor: React.FC = () => {
       className="flex h-[calc(100vh-4rem)] w-full flex-col"
     >
       <ScrollArea className="h-[calc(100vh-7.5rem)]">
-        <motion.div
-          variants={OPACITY_ANIMATION}
-          initial="hidden"
-          animate="visible"
-          className={cn("grid gap-x-4 gap-y-5 overflow-hidden px-5 py-4", {
-            "grid-cols-1": editorWidth <= 300,
-            "grid-cols-2": editorWidth > 300 && editorWidth <= 900,
-            "grid-cols-3": editorWidth > 900,
-          })}
-        >
-          {sortedItems.map((item) => {
-            const placeholder = PlaceholderMap.find(
-              (i) => i.key === item.key,
-            )?.placeholder;
-
-            if (item.key === "gender") {
-              return (
-                <SortTool
-                  sortedItems={sortedItems}
-                  key="gender"
-                  item={item}
-                  setFormState={setFormState}
-                >
-                  <div className="w-full space-y-1.5">
-                    <div className="inline-flex items-center space-x-1">
-                      <Label>性别</Label>
-                      <div className="text-xs text-danger-light">*</div>
-                    </div>
-                    <Select
-                      value={formState.gender.value}
-                      onValueChange={(v) => {
-                        setFormState((prev) => ({
-                          ...prev,
-                          gender: {
-                            ...prev.gender,
-                            value: v,
-                          },
-                        }));
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder="请选择性别"
-                          className="text-custom-secondary placeholder:text-custom-secondary"
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="男">男</SelectItem>
-                        <SelectItem value="女">女</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </SortTool>
-              );
-            }
-
-            const inputType = CheckType(item.key);
-
-            return (
-              <SortTool
-                sortedItems={sortedItems}
-                item={item}
-                setFormState={setFormState}
-                key={item.key}
-              >
-                <FormInput
-                  required={["name", "age"].includes(item.key)}
-                  label={item.label}
-                  placeholder={placeholder || ""}
-                  type={inputType}
-                  step={inputType === "number" ? 1 : undefined}
-                  min={item.key === "age" ? 1 : undefined}
-                  max={item.key === "age" ? 100 : undefined}
-                  value={item.value}
-                  onValueChange={(v, e) => {
-                    setFormState((prev) => ({
-                      ...prev,
-                      [item.key]: {
-                        ...prev[item.key],
-                        value: v,
-                      },
-                    }));
-                  }}
-                />
-              </SortTool>
-            );
-          })}
-        </motion.div>
+        <SortableList
+          editorWidth={editorWidth}
+          items={sortedItems}
+          formState={formState}
+          setFormState={setFormState}
+          onSortEnd={(event) =>
+            handleEditorSortEnd(event, sortedItems, formState, setFormState)
+          }
+        />
       </ScrollArea>
       <div className="flex h-14 w-full items-center justify-end space-x-2 px-4">
         <Button
           disabled={submitLoading}
+          variant="outline"
           onClick={() => setAddItemModalOpen(true)}
-          className="border border-custom bg-custom text-custom hover:border-primary hover:text-primary"
         >
           添加词条
         </Button>
@@ -242,120 +407,19 @@ const BasicEditor: React.FC = () => {
         open={addItemModalOpen}
         onClose={() => setAddItemModalOpen(false)}
         onSubmit={(v) => {
-          const key = generateRandomSalt(6);
+          const key = generateRandomSalt(7);
 
-          // use last item sort as base
-          const sort = sortedItems[sortedItems.length - 1].sort + 1;
           setFormState((prev) => ({
             ...prev,
             [key]: {
               label: v.label,
               value: v.value,
-              sort,
+              sort: sortedItems[sortedItems.length - 1].sort + 1,
               isCustom: true,
             },
           }));
         }}
       />
-    </div>
-  );
-};
-
-const SortTool: React.FC<{
-  children: React.ReactNode;
-  item: {
-    key: string;
-    sort: number;
-    isCustom: boolean;
-    value: string;
-  };
-  sortedItems: {
-    isCustom: boolean;
-    label: string;
-    sort: number;
-    value: string;
-    key: string;
-  }[];
-  setFormState: React.Dispatch<React.SetStateAction<BasicDataFormState>>;
-}> = ({ children, item, sortedItems, setFormState }) => {
-  return (
-    <div className="group relative w-full">
-      {children}
-      <div className="absolute right-0 top-1.5 hidden items-center space-x-1 group-hover:flex">
-        <ArrowUp
-          onClick={() => {
-            setFormState((prev) => {
-              const currentIndex = sortedItems.findIndex(
-                (i) => i.key === item.key,
-              );
-
-              // not first item and found
-              if (currentIndex < 1) return prev;
-
-              const prevItem = sortedItems[currentIndex - 1];
-
-              if (!prevItem) return prev;
-
-              return {
-                ...prev,
-                [item.key]: {
-                  ...prev[item.key],
-                  sort: prevItem.sort,
-                },
-                [prevItem.key]: {
-                  ...prev[prevItem.key],
-                  sort: item.sort,
-                },
-              };
-            });
-          }}
-          className="h-3.5 w-3.5 cursor-pointer transition-colors hover:text-primary"
-        />
-        <ArrowDown
-          onClick={() => {
-            setFormState((prev) => {
-              const currentIndex = sortedItems.findIndex(
-                (i) => i.key === item.key,
-              );
-
-              // not last item and found
-              if (
-                currentIndex === sortedItems.length - 1 ||
-                currentIndex === -1
-              )
-                return prev;
-
-              const nextItem = sortedItems[currentIndex + 1];
-
-              if (!nextItem) return prev;
-
-              return {
-                ...prev,
-                [item.key]: {
-                  ...prev[item.key],
-                  sort: nextItem.sort,
-                },
-                [nextItem.key]: {
-                  ...prev[nextItem.key],
-                  sort: item.sort,
-                },
-              };
-            });
-          }}
-          className="h-3.5 w-3.5 cursor-pointer transition-colors hover:text-primary"
-        />
-        {item.isCustom && (
-          <Trash2
-            onClick={() => {
-              setFormState((prev) => {
-                const { [item.key]: _, ...rest } = prev;
-                return rest;
-              });
-            }}
-            className="h-3.5 w-3.5 cursor-pointer text-danger-light"
-          />
-        )}
-      </div>
     </div>
   );
 };
