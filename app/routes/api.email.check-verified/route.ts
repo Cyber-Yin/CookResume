@@ -29,6 +29,7 @@ export const action: ActionFunction = async ({ request }) => {
       verified: !user || !user.verified ? false : true,
     });
   } catch (e) {
+    console.log(e);
     return json(
       {
         message: formatError(e),

@@ -1,6 +1,14 @@
-export type ResumeConfig = {
-  template: number;
+export type ResumeMetaData = {
   avatar?: string;
+  labelSort: string[];
+};
+
+export type ResumeMeta = {
+  title: string;
+  template: number;
+  published: number;
+  created_at: number;
+  updated_at: number;
 };
 
 export type ResumeBasicData = {
@@ -10,38 +18,51 @@ export type ResumeBasicData = {
   value: string;
 };
 
-export type ResumeData = {
-  config: ResumeConfig;
+export type ResumeEducationData = {
+  key: string;
+  experience: string;
+  sort: number;
+  school: string;
+  major: string;
+  startDate: string;
+  endDate: string;
+};
+
+export type ResumeJobData = {
+  key: string;
+  experience: string;
+  sort: number;
+  company: string;
+  role: string;
+  startDate: string;
+  endDate: string;
+};
+
+export type ResumeProjectData = {
+  key: string;
+  name: string;
+  sort: number;
+  description: string;
+};
+
+export type ResumeCustomData = {
+  label: string;
+  value: string;
+};
+
+export type ResumeContent = {
+  meta: ResumeMetaData;
   basic: ResumeBasicData[];
-  education: EducationFormState[];
-  job: JobFormState[];
-  project: ProjectFormState[];
+  education: ResumeEducationData[];
+  job: ResumeJobData[];
+  project: ResumeProjectData[];
   skill: string;
+  custom: ResumeCustomData;
 };
 
-export type ResumeDetailResponse = {
-  title: string;
-  content: string;
-  published: number;
-  created_at: number;
-  updated_at: number;
-};
-
-export type FormattedResumeContent = {
-  config: ResumeConfig;
-  basic: Record<
-    string,
-    {
-      isCustom: boolean;
-      label: string;
-      value: string;
-      sort: number;
-    }
-  >;
-  education: EducationFormState[];
-  job: JobFormState[];
-  project: ProjectFormState[];
-  skill: string;
+export type ResumeGetResponse = {
+  meta: ResumeMeta;
+  content: ResumeContent;
 };
 
 export type BasicDataFormState = {
@@ -54,25 +75,31 @@ export type BasicDataFormState = {
 };
 
 export type EducationFormState = {
-  experience: string;
-  sort: number;
-  school: string;
-  major: string;
-  startDate: string;
-  endDate: string;
+  [key: string]: {
+    experience: string;
+    sort: number;
+    school: string;
+    major: string;
+    startDate: string;
+    endDate: string;
+  };
 };
 
 export type JobFormState = {
-  experience: string;
-  sort: number;
-  company: string;
-  role: string;
-  startDate: string;
-  endDate: string;
+  [key: string]: {
+    experience: string;
+    sort: number;
+    company: string;
+    role: string;
+    startDate: string;
+    endDate: string;
+  };
 };
 
 export type ProjectFormState = {
-  name: string;
-  sort: number;
-  description: string;
+  [key: string]: {
+    name: string;
+    sort: number;
+    description: string;
+  };
 };

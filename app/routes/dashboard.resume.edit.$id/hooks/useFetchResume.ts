@@ -3,48 +3,32 @@ import axios from "axios";
 import useSWR from "swr";
 
 import { useToast } from "@/components/Toaster/hooks";
-import { FormattedResumeContent, ResumeData } from "@/lib/types/resume";
+import { ResumeGetResponse } from "@/lib/types/resume";
 import { formatError } from "@/lib/utils";
-import { formatResumeBasicData } from "@/lib/utils/resume";
+
+import { useResumeContent } from "./useResumeContent";
 
 export const useFetchResume = () => {
   const { id } = useParams();
   const { toast } = useToast();
+  const { setContent, setMeta } = useResumeContent();
 
   const { data, isValidating, isLoading, mutate } = useSWR(
     id ? `/api/resume/${id}` : null,
     async (url) => {
       try {
         const { data } = await axios.get<{
-          data: {
-            title: string;
-            content: string;
-            published: number;
-            created_at: number;
-            updated_at: number;
-          };
+          data: ResumeGetResponse;
         }>(url, {
           withCredentials: true,
         });
 
-        const jsonContent: ResumeData = JSON.parse(data.data.content);
-
-        const formattedContent: FormattedResumeContent = {
-          config: jsonContent.config,
-          basic: formatResumeBasicData(jsonContent.basic || []),
-          education: jsonContent.education || [],
-          job: jsonContent.job || [],
-          project: jsonContent.project || [],
-          skill: jsonContent.skill || "",
-        };
+        setContent(data.data.content);
+        setMeta(data.data.meta);
 
         return {
-          title: data.data.title,
-          formattedContent: formattedContent,
-          rawContent: jsonContent,
-          published: data.data.published ? true : false,
-          createdAt: data.data.created_at,
-          updatedAt: data.data.updated_at,
+          content: data.data.content,
+          meta: data.data.meta,
         };
       } catch (e) {
         toast({

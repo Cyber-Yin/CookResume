@@ -8,7 +8,7 @@ import { formatError, validatePayload } from "@/lib/utils";
 
 const RequestSchema = z.object({
   title: z.string().min(1),
-  content: z.string().min(1),
+  template: z.number().int().min(0),
 });
 
 type RequestSchemaType = z.infer<typeof RequestSchema>;
@@ -42,7 +42,29 @@ export const action: ActionFunction = async ({ request }) => {
       data: {
         title: data.title,
         user_id: userId,
-        content: data.content,
+        template: data.template,
+        content: JSON.stringify({
+          basic: [
+            {
+              key: "name",
+              label: "姓名",
+              sort: 0,
+              value: "",
+            },
+            {
+              key: "age",
+              label: "年龄",
+              sort: 1,
+              value: "",
+            },
+            {
+              key: "gender",
+              label: "性别",
+              sort: 2,
+              value: "男",
+            },
+          ],
+        }),
         published: 0,
         created_at: dayjs().unix(),
         updated_at: dayjs().unix(),
@@ -55,6 +77,7 @@ export const action: ActionFunction = async ({ request }) => {
       },
     });
   } catch (e) {
+    console.log(e);
     return json(
       {
         message: formatError(e),

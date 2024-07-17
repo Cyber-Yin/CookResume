@@ -35,6 +35,7 @@ export const action: ActionFunction = async ({ request }) => {
       registered: user ? true : false,
     });
   } catch (e) {
+    console.log(e);
     return json(
       {
         message: formatError(e),
