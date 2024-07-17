@@ -117,6 +117,7 @@ export const action: ActionFunction = async ({ request }) => {
       message: "发送成功",
     });
   } catch (e) {
+    console.log(e);
     return json(
       {
         message: formatError(e),

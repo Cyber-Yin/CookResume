@@ -60,6 +60,7 @@ export const action: ActionFunction = async ({ request }) => {
 
     return createUserSession(user.id, salt);
   } catch (e) {
+    console.log(e);
     return json(
       {
         message: formatError(e),

@@ -45,11 +45,7 @@ const CreateResumeForm = () => {
         "/api/resume/new",
         {
           title,
-          content: JSON.stringify({
-            config: {
-              template,
-            },
-          }),
+          template,
         },
         {
           withCredentials: true,

@@ -10,11 +10,11 @@ import { useFetchResume } from "./useFetchResume";
 export const useSubmitResumeSection = () => {
   const { id } = useParams();
   const { toast } = useToast();
-  const { resumeInfo, refreshResume } = useFetchResume();
+  const { refreshResume } = useFetchResume();
 
   const [submitLoading, setSubmitLoading] = useState(false);
 
-  const handleSubmit = async (data: any, key: string) => {
+  const handleSubmit = async (data: any) => {
     try {
       if (!id) {
         throw new Error("简历 ID 不存在");
@@ -30,10 +30,7 @@ export const useSubmitResumeSection = () => {
 
       await axios.post("/api/resume/update", {
         resume_id: parseInt(id),
-        content: JSON.stringify({
-          ...resumeInfo!.rawContent,
-          [key]: data,
-        }),
+        ...data,
       });
 
       refreshResume();

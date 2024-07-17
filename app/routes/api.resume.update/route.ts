@@ -8,9 +8,14 @@ import { formatError, validatePayload } from "@/lib/utils";
 
 const RequestSchema = z.object({
   resume_id: z.number().int().min(1),
-  title: z.string().optional(),
+  meta: z
+    .object({
+      title: z.string().optional(),
+      template: z.number().int().min(0).optional(),
+      published: z.union([z.literal(0), z.literal(1)]).optional(),
+    })
+    .optional(),
   content: z.string().optional(),
-  published: z.boolean().optional(),
 });
 
 type RequestSchemaType = z.infer<typeof RequestSchema>;
@@ -51,25 +56,27 @@ export const action: ActionFunction = async ({ request }) => {
     }
 
     if (resume.user_id !== userId) {
-      throw new Error("无权操作简历");
+      throw new Error("无权访问");
     }
 
-    const updatedResume = await DatabaseInstance.resume.update({
+    await DatabaseInstance.resume.update({
       where: {
         id: data.resume_id,
       },
       data: {
-        title: data.title || resume.title,
+        title: data.meta?.title || resume.title,
         content: data.content || resume.content,
-        published: data.published ? 1 : 0,
+        published: data.meta?.published === 1 ? 1 : 0,
+        template: data.meta?.template || resume.template,
         updated_at: dayjs().unix(),
       },
     });
 
     return json({
-      data: updatedResume,
+      success: true,
     });
   } catch (e) {
+    console.log(e);
     return json(
       {
         message: formatError(e),

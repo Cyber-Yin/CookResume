@@ -18,6 +18,7 @@ export const action: ActionFunction = async ({ request }) => {
 
     return destroyUserSession(request);
   } catch (e) {
+    console.log(e);
     return json(
       {
         message: formatError(e),
