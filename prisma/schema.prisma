@@ -25,4 +25,7 @@ model resume {
     published  Int    @db.UnsignedTinyInt
     created_at Int    @db.UnsignedInt
     updated_at Int    @db.UnsignedInt
+    template   Int    @db.UnsignedInt
+
+    @@index([user_id])
 }
