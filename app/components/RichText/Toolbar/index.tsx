@@ -91,7 +91,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
               <ListOrdered className="h-4 w-4" />
             </Toggle>
 
-            <Toggle
+            {/* <Toggle
               size="sm"
               className="mr-1"
               onPressedChange={() =>
@@ -111,7 +111,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
               pressed={editor.isActive("blockquote")}
             >
               <Quote className="h-4 w-4" />
-            </Toggle>
+            </Toggle> */}
           </ToggleGroup>
 
           <ToggleGroup
