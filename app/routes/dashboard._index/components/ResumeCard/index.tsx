@@ -6,7 +6,7 @@ import { CalendarDays, Eye } from "lucide-react";
 import { Button } from "@/components/Button";
 import { FADE_IN_ANIMATION } from "@/lib/const/animation";
 import { RESUME_TEMPLATE } from "@/lib/const/resume-template";
-import { ResumeData } from "@/lib/types/resume";
+import { ResumeContent } from "@/lib/types/resume";
 import { cn } from "@/lib/utils";
 
 const ResumeCard: React.FC<{
@@ -15,6 +15,7 @@ const ResumeCard: React.FC<{
     title: string;
     content: string;
     published: number;
+    template: number;
     created_at: number;
     updated_at: number;
   };
@@ -22,9 +23,7 @@ const ResumeCard: React.FC<{
 }> = ({ resume, index }) => {
   const navigate = useNavigate();
 
-  const data: ResumeData = JSON.parse(resume.content);
-
-  const template = RESUME_TEMPLATE[data.config.template];
+  const template = RESUME_TEMPLATE[resume.template];
 
   return (
     <motion.div

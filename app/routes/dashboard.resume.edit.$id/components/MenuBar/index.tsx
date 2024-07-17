@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 import { DEFAULT_MENU_ITEMS } from "../../const";
 
-const MenuBarVariants = {
+export const MenuBarVariants = {
   hidden: { opacity: 0 },
   visible: (i: number) => ({
     opacity: 1,
@@ -21,44 +21,46 @@ const MenuBar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const tab = useMemo(() => {
-    return searchParams.get("tab") || "resume_setting";
+    return searchParams.get("tab") || "meta";
   }, [searchParams]);
 
   return (
-    <ScrollArea className="h-full w-80 border-r bg-custom">
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        className="space-y-2 py-2"
-      >
-        {DEFAULT_MENU_ITEMS.map((item, index) => (
-          <motion.div
-            key={item.key}
-            custom={index}
-            variants={MenuBarVariants}
-            className="px-2"
-          >
-            <div
-              onClick={() => setSearchParams({ tab: item.key })}
-              className={cn(
-                "group flex cursor-pointer items-center space-x-2 rounded px-4 py-3 transition-colors",
-                {
-                  "bg-primary": tab === item.key,
-                  "hover:bg-custom-hover": tab !== item.key,
-                },
-              )}
+    <ScrollArea className="h-full w-full grow">
+      <div className="flex w-full">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          className="h-full grow space-y-2 py-2"
+        >
+          {DEFAULT_MENU_ITEMS.map((item, index) => (
+            <motion.div
+              key={item.key}
+              custom={index}
+              variants={MenuBarVariants}
+              className="px-2"
             >
               <div
-                className={cn("font-semibold transition-colors", {
-                  "text-white": tab === item.key,
-                })}
+                onClick={() => setSearchParams({ tab: item.key })}
+                className={cn(
+                  "flex cursor-pointer items-center space-x-2 rounded px-4 py-3 transition-colors",
+                  {
+                    "bg-primary": tab === item.key,
+                    "hover:bg-custom-hover": tab !== item.key,
+                  },
+                )}
               >
-                {item.label}
+                <div
+                  className={cn("font-semibold transition-colors", {
+                    "text-white": tab === item.key,
+                  })}
+                >
+                  {item.label}
+                </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
     </ScrollArea>
   );
 };

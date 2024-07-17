@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsFirstRender } from "@uidotdev/usehooks";
 import { motion } from "framer-motion";
 import { Check, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -11,28 +12,41 @@ import { RESUME_TEMPLATE } from "@/lib/const/resume-template";
 import { cn } from "@/lib/utils";
 import { useFetchResume } from "@/routes/dashboard.resume.edit.$id/hooks/useFetchResume";
 import useResizeObserver from "@/routes/dashboard.resume.edit.$id/hooks/useResizeObserver";
+import { useResumeContent } from "@/routes/dashboard.resume.edit.$id/hooks/useResumeContent";
 import { useSubmitResumeSection } from "@/routes/dashboard.resume.edit.$id/hooks/useSubmitResumeSection";
 
 const TemplateEditor: React.FC = () => {
   const { resumeInfo, resumeLoading, resumeValidating } = useFetchResume();
   const { handleFormSubmit, submitLoading } = useSubmitResumeSection();
+  const { meta, setMeta } = useResumeContent();
+  const isFirstRender = useIsFirstRender();
 
   const [selectedTemplate, setSelectedTemplate] = useState(0);
-
-  const { ref: editorRef, width: editorWidth } = useResizeObserver();
-
-  const handleSubmit = async () => {
-    await handleFormSubmit(
-      { ...resumeInfo!.rawContent.config, template: selectedTemplate },
-      "config",
-    );
-  };
 
   useEffect(() => {
     if (!resumeInfo) return;
 
-    setSelectedTemplate(resumeInfo.formattedContent.config.template);
+    setSelectedTemplate(resumeInfo.meta.template);
   }, [resumeInfo]);
+
+  useEffect(() => {
+    if (isFirstRender) return;
+
+    setMeta({
+      ...meta,
+      template: selectedTemplate,
+    });
+  }, [selectedTemplate]);
+
+  const { ref: editorRef, width: editorWidth } = useResizeObserver();
+
+  const handleSubmit = async () => {
+    await handleFormSubmit({
+      meta: {
+        template: selectedTemplate,
+      },
+    });
+  };
 
   return (
     <div
