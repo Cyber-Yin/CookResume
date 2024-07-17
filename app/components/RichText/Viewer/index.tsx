@@ -1,5 +1,6 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { useEffect } from "react";
 
 interface ViewerProps {
   content: string;
@@ -13,18 +14,20 @@ const Viewer = ({ content, style }: ViewerProps) => {
     editable: false,
   });
 
+  useEffect(() => {
+    if (!editor || !content) return;
+
+    editor.commands.setContent(content);
+  }, [content]);
+
   if (!editor) return <></>;
 
-  const className: string =
-    style === "prose" ? "prose-mt-0 prose max-w-none dark:prose-invert" : "";
-
   return (
-    <article className={className}>
-      <EditorContent
-        editor={editor}
-        readOnly={true}
-      />
-    </article>
+    <EditorContent
+      className="viewer"
+      editor={editor}
+      readOnly={true}
+    />
   );
 };
 
