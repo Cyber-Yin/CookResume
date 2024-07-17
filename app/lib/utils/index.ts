@@ -1,3 +1,5 @@
+import { DragEndEvent } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 import { isAxiosError } from "axios";
 import { type ClassValue, clsx } from "clsx";
 import { sha256 } from "js-sha256";
@@ -76,41 +78,48 @@ export const checkRichTextOutputIsNull = (value: string) => {
 };
 
 interface SortableItem {
+  key: string;
   sort: number;
 }
-
-export const swapItems = <T extends SortableItem>(
-  currentKey: string,
-  targetKey: string,
-  setFormState: React.Dispatch<
-    React.SetStateAction<{
-      [key: string]: T;
-    }>
-  >,
-) => {
-  setFormState((prev) => {
-    if (!currentKey || !targetKey) return prev;
-
-    const currentItem = prev[currentKey];
-    const targetItem = prev[targetKey];
-
-    if (!currentItem || !targetItem) return prev;
-
-    return {
-      ...prev,
-      [currentKey]: {
-        ...currentItem,
-        sort: targetItem.sort,
-      },
-      [targetKey]: {
-        ...targetItem,
-        sort: currentItem.sort,
-      },
-    };
-  });
-};
 
 export const generateVerificationCode = (): string => {
   const code = Math.floor(100000 + Math.random() * 900000);
   return code.toString();
+};
+
+export const handleEditorSortEnd = <T extends SortableItem>(
+  event: DragEndEvent,
+  items: T[],
+  formState: {
+    [key: string]: any;
+  },
+  setFormState: React.Dispatch<
+    React.SetStateAction<{
+      [key: string]: any;
+    }>
+  >,
+) => {
+  const { active, over } = event;
+
+  if (!over) return;
+
+  if (active.id === over.id) return;
+
+  const oldIndex = items.findIndex((item) => item.key === active.id);
+  const newIndex = items.findIndex((item) => item.key === over.id);
+
+  if (oldIndex === -1 || newIndex === -1) return;
+
+  const newItems = arrayMove(items, oldIndex, newIndex);
+
+  const updatedFormState = { ...formState };
+
+  newItems.forEach((item, index) => {
+    updatedFormState[item.key] = {
+      ...updatedFormState[item.key],
+      sort: index,
+    };
+  });
+
+  setFormState(updatedFormState);
 };
