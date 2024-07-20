@@ -1,6 +1,13 @@
 import Viewer from "@/components/RichText/Viewer";
 import { ResumeContent, ResumeMeta } from "@/lib/types/resume";
 
+import BasicPreview from "../BasicPreview";
+import CustomPreview from "../CustomPreview";
+import EducationPreview from "../EducationPreview";
+import JobPreview from "../JobPreview";
+import ProjectPreview from "../ProjectPreview";
+import SkillPreview from "../SkillPreview";
+
 const TemplateXAI: React.FC<{
   content?: ResumeContent;
   meta?: ResumeMeta;
@@ -32,179 +39,58 @@ const TemplateXAI: React.FC<{
               switch (label) {
                 case "basic":
                   return (
-                    <div
+                    <BasicPreview
                       key={label}
-                      className="w-full space-y-3"
-                    >
-                      <div className="flex w-3/4">
-                        <div className="grid grow grid-cols-2 gap-x-3 gap-y-2">
-                          {content.basic.map((item) => {
-                            return item.value ? (
-                              <div
-                                className="flex items-center space-x-3"
-                                key={item.key}
-                              >
-                                <div className="flex items-center">
-                                  <div>{`${item.label}：`}</div>
-                                  <div>{item.value}</div>
-                                </div>
-                              </div>
-                            ) : null;
-                          })}
-                        </div>
-                      </div>
-                    </div>
+                      content={content}
+                      meta={meta}
+                      template="template_xai"
+                    />
                   );
                 case "education":
-                  return content.education.length > 0 ? (
-                    <div
+                  return (
+                    <EducationPreview
                       key={label}
-                      className="w-full space-y-3"
-                    >
-                      <div className="flex w-full items-center space-x-2 border-b border-[#333333]">
-                        <div
-                          style={{
-                            clipPath:
-                              "polygon(0% 100%, 0% 0%, 85% 0%, 100% 100%)",
-                          }}
-                          className="shrink-0 bg-[#333333] py-1 pl-3 pr-6 text-lg font-semibold text-white"
-                        >
-                          教育背景
-                        </div>
-                      </div>
-                      {content.education.map((item) => {
-                        return (
-                          <div
-                            key={item.key}
-                            className="w-full space-y-2"
-                          >
-                            <div className="flex w-full items-center justify-between font-semibold">
-                              <div>{`${item.startDate} - ${item.endDate}`}</div>
-                              <div>{item.school}</div>
-                              <div>{item.major}</div>
-                            </div>
-                            {item.experience && (
-                              <Viewer content={item.experience} />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : null;
+                      content={content}
+                      meta={meta}
+                      template="template_xai"
+                    />
+                  );
                 case "job":
-                  return content.job.length > 0 ? (
-                    <div
+                  return (
+                    <JobPreview
                       key={label}
-                      className="w-full space-y-3"
-                    >
-                      <div className="flex w-full items-center space-x-2 border-b border-[#333333]">
-                        <div
-                          style={{
-                            clipPath:
-                              "polygon(0% 100%, 0% 0%, 85% 0%, 100% 100%)",
-                          }}
-                          className="shrink-0 bg-[#333333] py-1 pl-3 pr-6 text-lg font-semibold text-white"
-                        >
-                          工作经历
-                        </div>
-                      </div>
-                      {content.job.map((item) => {
-                        return (
-                          <div
-                            key={item.key}
-                            className="w-full space-y-2"
-                          >
-                            <div className="flex w-full items-center justify-between font-semibold">
-                              <div>{`${item.startDate} - ${item.endDate}`}</div>
-                              <div>{item.company}</div>
-                              <div>{item.role}</div>
-                            </div>
-                            {item.experience && (
-                              <Viewer content={item.experience} />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : null;
+                      content={content}
+                      meta={meta}
+                      template="template_xai"
+                    />
+                  );
                 case "project":
-                  return content.project.length > 0 ? (
-                    <div
+                  return (
+                    <ProjectPreview
                       key={label}
-                      className="w-full space-y-3"
-                    >
-                      <div className="flex w-full items-center space-x-2 border-b border-[#333333]">
-                        <div
-                          style={{
-                            clipPath:
-                              "polygon(0% 100%, 0% 0%, 85% 0%, 100% 100%)",
-                          }}
-                          className="shrink-0 bg-[#333333] py-1 pl-3 pr-6 text-lg font-semibold text-white"
-                        >
-                          项目经验
-                        </div>
-                      </div>
-                      {content.project.map((item) => {
-                        return (
-                          <div
-                            key={item.key}
-                            className="w-full space-y-2"
-                          >
-                            <div className="flex w-full items-center justify-between font-semibold">
-                              <div>{item.name}</div>
-                            </div>
-                            {item.description && (
-                              <Viewer content={item.description} />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : null;
+                      content={content}
+                      meta={meta}
+                      template="template_xai"
+                    />
+                  );
                 case "skill":
-                  return content.skill ? (
-                    <div
+                  return (
+                    <SkillPreview
                       key={label}
-                      className="w-full space-y-3"
-                    >
-                      <div className="flex w-full items-center space-x-2 border-b border-[#333333]">
-                        <div
-                          style={{
-                            clipPath:
-                              "polygon(0% 100%, 0% 0%, 85% 0%, 100% 100%)",
-                          }}
-                          className="shrink-0 bg-[#333333] py-1 pl-3 pr-6 text-lg font-semibold text-white"
-                        >
-                          个人技能
-                        </div>
-                      </div>
-                      <div className="w-full space-y-2">
-                        <Viewer content={content.skill} />
-                      </div>
-                    </div>
-                  ) : null;
+                      content={content}
+                      meta={meta}
+                      template="template_xai"
+                    />
+                  );
                 case "custom":
-                  return content.custom.label && content.custom.value ? (
-                    <div
+                  return (
+                    <CustomPreview
                       key={label}
-                      className="w-full space-y-3"
-                    >
-                      <div className="flex w-full items-center space-x-2 border-b border-[#333333]">
-                        <div
-                          style={{
-                            clipPath:
-                              "polygon(0% 100%, 0% 0%, 85% 0%, 100% 100%)",
-                          }}
-                          className="shrink-0 bg-[#333333] py-1 pl-3 pr-6 text-lg font-semibold text-white"
-                        >
-                          {content.custom.label}
-                        </div>
-                      </div>
-                      <div className="w-full space-y-2">
-                        <Viewer content={content.custom.value} />
-                      </div>
-                    </div>
-                  ) : null;
+                      content={content}
+                      meta={meta}
+                      template="template_xai"
+                    />
+                  );
                 default:
                   return null;
               }
@@ -212,147 +98,36 @@ const TemplateXAI: React.FC<{
           </>
         ) : (
           <>
-            <div className="w-full space-y-3">
-              <div className="flex w-3/4">
-                <div className="grid grow grid-cols-2 gap-x-3 gap-y-2">
-                  {content.basic.map((item) => {
-                    return item.value ? (
-                      <div
-                        className="flex items-center space-x-3"
-                        key={item.key}
-                      >
-                        <div className="flex items-center">
-                          <div>{`${item.label}：`}</div>
-                          <div>{item.value}</div>
-                        </div>
-                      </div>
-                    ) : null;
-                  })}
-                </div>
-              </div>
-            </div>
-            {content.education.length > 0 && (
-              <div className="w-full space-y-3">
-                <div className="flex w-full items-center space-x-2 border-b border-[#333333]">
-                  <div
-                    style={{
-                      clipPath: "polygon(0% 100%, 0% 0%, 85% 0%, 100% 100%)",
-                    }}
-                    className="shrink-0 bg-[#333333] py-1 pl-3 pr-6 text-lg font-semibold text-white"
-                  >
-                    教育背景
-                  </div>
-                </div>
-                {content.education.map((item) => {
-                  return (
-                    <div
-                      key={item.key}
-                      className="w-full space-y-2"
-                    >
-                      <div className="flex w-full items-center justify-between font-semibold">
-                        <div>{`${item.startDate} - ${item.endDate}`}</div>
-                        <div>{item.school}</div>
-                        <div>{item.major}</div>
-                      </div>
-                      {item.experience && <Viewer content={item.experience} />}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-            {content.skill && (
-              <div className="w-full space-y-3">
-                <div className="flex w-full items-center space-x-2 border-b border-[#333333]">
-                  <div
-                    style={{
-                      clipPath: "polygon(0% 100%, 0% 0%, 85% 0%, 100% 100%)",
-                    }}
-                    className="shrink-0 bg-[#333333] py-1 pl-3 pr-6 text-lg font-semibold text-white"
-                  >
-                    个人技能
-                  </div>
-                </div>
-                <div className="w-full space-y-2">
-                  <Viewer content={content.skill} />
-                </div>
-              </div>
-            )}
-            {content.job.length > 0 && (
-              <div className="w-full space-y-3">
-                <div className="flex w-full items-center space-x-2 border-b border-[#333333]">
-                  <div
-                    style={{
-                      clipPath: "polygon(0% 100%, 0% 0%, 85% 0%, 100% 100%)",
-                    }}
-                    className="shrink-0 bg-[#333333] py-1 pl-3 pr-6 text-lg font-semibold text-white"
-                  >
-                    工作经历
-                  </div>
-                </div>
-                {content.job.map((item) => {
-                  return (
-                    <div
-                      key={item.key}
-                      className="w-full space-y-2"
-                    >
-                      <div className="flex w-full items-center justify-between font-semibold">
-                        <div>{`${item.startDate} - ${item.endDate}`}</div>
-                        <div>{item.company}</div>
-                        <div>{item.role}</div>
-                      </div>
-                      {item.experience && <Viewer content={item.experience} />}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-            {content.project.length > 0 && (
-              <div className="w-full space-y-3">
-                <div className="flex w-full items-center space-x-2 border-b border-[#333333]">
-                  <div
-                    style={{
-                      clipPath: "polygon(0% 100%, 0% 0%, 85% 0%, 100% 100%)",
-                    }}
-                    className="shrink-0 bg-[#333333] py-1 pl-3 pr-6 text-lg font-semibold text-white"
-                  >
-                    项目经验
-                  </div>
-                </div>
-                {content.project.map((item) => {
-                  return (
-                    <div
-                      key={item.key}
-                      className="w-full space-y-2"
-                    >
-                      <div className="flex w-full items-center justify-between font-semibold">
-                        <div>{item.name}</div>
-                      </div>
-                      {item.description && (
-                        <Viewer content={item.description} />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {content.custom.label && content.custom.value && (
-              <div className="w-full space-y-3">
-                <div className="flex w-full items-center space-x-2 border-b border-[#333333]">
-                  <div
-                    style={{
-                      clipPath: "polygon(0% 100%, 0% 0%, 85% 0%, 100% 100%)",
-                    }}
-                    className="shrink-0 bg-[#333333] py-1 pl-3 pr-6 text-lg font-semibold text-white"
-                  >
-                    {content.custom.label}
-                  </div>
-                </div>
-                <div className="w-full space-y-2">
-                  <Viewer content={content.custom.value} />
-                </div>
-              </div>
-            )}
+            <BasicPreview
+              content={content}
+              meta={meta}
+              template="template_xai"
+            />
+            <EducationPreview
+              content={content}
+              meta={meta}
+              template="template_xai"
+            />
+            <SkillPreview
+              content={content}
+              meta={meta}
+              template="template_xai"
+            />
+            <JobPreview
+              content={content}
+              meta={meta}
+              template="template_xai"
+            />
+            <ProjectPreview
+              content={content}
+              meta={meta}
+              template="template_xai"
+            />
+            <CustomPreview
+              content={content}
+              meta={meta}
+              template="template_xai"
+            />
           </>
         )}
       </div>
