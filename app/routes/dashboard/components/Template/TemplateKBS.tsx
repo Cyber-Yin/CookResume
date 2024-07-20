@@ -3,6 +3,13 @@ import { useMemo } from "react";
 import Viewer from "@/components/RichText/Viewer";
 import { ResumeContent, ResumeMeta } from "@/lib/types/resume";
 
+import BasicPreview from "../BasicPreview";
+import CustomPreview from "../CustomPreview";
+import EducationPreview from "../EducationPreview";
+import JobPreview from "../JobPreview";
+import ProjectPreview from "../ProjectPreview";
+import SkillPreview from "../SkillPreview";
+
 const TemplateKBS: React.FC<{
   content?: ResumeContent;
   meta?: ResumeMeta;
@@ -52,203 +59,58 @@ const TemplateKBS: React.FC<{
             switch (label) {
               case "basic":
                 return (
-                  <div
+                  <BasicPreview
                     key={label}
-                    className="w-full px-3"
-                  >
-                    <div className="flex w-full items-start space-x-6 px-3">
-                      {content.basic.filter(
-                        (item) => item.key !== "name" && item.key !== "job",
-                      ).length > 0 && (
-                        <div className="grid grow grid-cols-2 gap-x-3 gap-y-2">
-                          {content.basic
-                            .filter(
-                              (item) =>
-                                item.key !== "name" && item.key !== "job",
-                            )
-                            .map((item) => {
-                              return item.value ? (
-                                <div
-                                  className="flex items-center space-x-3"
-                                  key={item.key}
-                                >
-                                  <div className="h-1.5 w-1.5 rounded-full bg-[#0f172a]"></div>
-                                  <div className="flex items-center">
-                                    <div>{`${item.label}：`}</div>
-                                    <div>{item.value}</div>
-                                  </div>
-                                </div>
-                              ) : null;
-                            })}
-                        </div>
-                      )}
-                      {meta.avatar && (
-                        <div className="shrink-0">
-                          <img
-                            src={meta.avatar}
-                            alt={meta.avatar}
-                            className="h-[140px] w-[100px]"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                    content={content}
+                    meta={meta}
+                    template="template_kbs"
+                  />
                 );
               case "education":
-                return content.education.length > 0 ? (
-                  <div
+                return (
+                  <EducationPreview
                     key={label}
-                    className="w-full space-y-3"
-                  >
-                    <div className="flex w-full items-center space-x-2">
-                      <div
-                        style={{
-                          clipPath:
-                            "polygon(0% 50%, 10% 100%, 90% 100%, 100% 50%, 90% 0%, 10% 0%)",
-                        }}
-                        className="shrink-0 rounded-lg bg-slate-500 px-6 py-1 text-lg font-semibold text-white"
-                      >
-                        教育背景
-                      </div>
-                      <div className="h-[1px] w-full grow bg-black"></div>
-                    </div>
-                    {content.education.map((item) => {
-                      return (
-                        <div
-                          key={item.key}
-                          className="w-full space-y-2 px-3"
-                        >
-                          <div className="flex w-full items-center justify-between font-semibold text-slate-500">
-                            <div>{`${item.startDate} - ${item.endDate}`}</div>
-                            <div>{item.school}</div>
-                            <div>{item.major}</div>
-                          </div>
-                          {item.experience && (
-                            <Viewer content={item.experience} />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : null;
+                    content={content}
+                    meta={meta}
+                    template="template_kbs"
+                  />
+                );
               case "job":
-                return content.job.length > 0 ? (
-                  <div
+                return (
+                  <JobPreview
                     key={label}
-                    className="w-full space-y-3"
-                  >
-                    <div className="flex w-full items-center space-x-2">
-                      <div
-                        style={{
-                          clipPath:
-                            "polygon(0% 50%, 10% 100%, 90% 100%, 100% 50%, 90% 0%, 10% 0%)",
-                        }}
-                        className="shrink-0 rounded-lg bg-slate-500 px-6 py-1 text-lg font-semibold text-white"
-                      >
-                        工作经历
-                      </div>
-                      <div className="h-[1px] w-full grow bg-black"></div>
-                    </div>
-                    {content.job.map((item) => {
-                      return (
-                        <div
-                          key={item.key}
-                          className="w-full space-y-2 px-3"
-                        >
-                          <div className="flex w-full items-center justify-between font-semibold text-slate-500">
-                            <div>{`${item.startDate} - ${item.endDate}`}</div>
-                            <div>{item.company}</div>
-                            <div>{item.role}</div>
-                          </div>
-                          {item.experience && (
-                            <Viewer content={item.experience} />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : null;
+                    content={content}
+                    meta={meta}
+                    template="template_kbs"
+                  />
+                );
               case "project":
-                return content.project.length > 0 ? (
-                  <div
+                return (
+                  <ProjectPreview
                     key={label}
-                    className="w-full space-y-3"
-                  >
-                    <div className="flex w-full items-center space-x-2">
-                      <div
-                        style={{
-                          clipPath:
-                            "polygon(0% 50%, 10% 100%, 90% 100%, 100% 50%, 90% 0%, 10% 0%)",
-                        }}
-                        className="shrink-0 rounded-lg bg-slate-500 px-6 py-1 text-lg font-semibold text-white"
-                      >
-                        项目经验
-                      </div>
-                      <div className="h-[1px] w-full grow bg-black"></div>
-                    </div>
-                    {content.project.map((item) => {
-                      return (
-                        <div
-                          key={item.key}
-                          className="w-full space-y-2 px-3"
-                        >
-                          <div className="flex w-full items-center justify-between font-semibold text-slate-500">
-                            <div>{item.name}</div>
-                          </div>
-                          {item.description && (
-                            <Viewer content={item.description} />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : null;
+                    content={content}
+                    meta={meta}
+                    template="template_kbs"
+                  />
+                );
               case "skill":
-                return content.skill ? (
-                  <div
+                return (
+                  <SkillPreview
                     key={label}
-                    className="w-full space-y-3"
-                  >
-                    <div className="flex w-full items-center space-x-2">
-                      <div
-                        style={{
-                          clipPath:
-                            "polygon(0% 50%, 10% 100%, 90% 100%, 100% 50%, 90% 0%, 10% 0%)",
-                        }}
-                        className="shrink-0 rounded-lg bg-slate-500 px-6 py-1 text-lg font-semibold text-white"
-                      >
-                        个人技能
-                      </div>
-                      <div className="h-[1px] w-full grow bg-black"></div>
-                    </div>
-                    <div className="w-full space-y-2 px-3">
-                      <Viewer content={content.skill} />
-                    </div>
-                  </div>
-                ) : null;
+                    content={content}
+                    meta={meta}
+                    template="template_kbs"
+                  />
+                );
               case "custom":
-                return content.custom.label && content.custom.value ? (
-                  <div
+                return (
+                  <CustomPreview
                     key={label}
-                    className="w-full space-y-3"
-                  >
-                    <div className="flex w-full items-center space-x-2">
-                      <div
-                        style={{
-                          clipPath:
-                            "polygon(0% 50%, 10% 100%, 90% 100%, 100% 50%, 90% 0%, 10% 0%)",
-                        }}
-                        className="shrink-0 rounded-lg bg-slate-500 px-6 py-1 text-lg font-semibold text-white"
-                      >
-                        {content.custom.label}
-                      </div>
-                      <div className="h-[1px] w-full grow bg-black"></div>
-                    </div>
-                    <div className="w-full space-y-2 px-3">
-                      <Viewer content={content.custom.value} />
-                    </div>
-                  </div>
-                ) : null;
+                    content={content}
+                    meta={meta}
+                    template="template_kbs"
+                  />
+                );
               default:
                 return null;
             }
@@ -256,171 +118,36 @@ const TemplateKBS: React.FC<{
         </>
       ) : (
         <>
-          <div className="w-full px-3">
-            <div className="flex w-full items-start space-x-6 px-3">
-              {content.basic.filter(
-                (item) => item.key !== "name" && item.key !== "job",
-              ).length > 0 && (
-                <div className="grid grow grid-cols-2 gap-x-3 gap-y-2">
-                  {content.basic
-                    .filter((item) => item.key !== "name" && item.key !== "job")
-                    .map((item) => {
-                      return item.value ? (
-                        <div
-                          className="flex items-center space-x-3"
-                          key={item.key}
-                        >
-                          <div className="h-1.5 w-1.5 rounded-full bg-[#0f172a]"></div>
-                          <div className="flex items-center">
-                            <div>{`${item.label}：`}</div>
-                            <div>{item.value}</div>
-                          </div>
-                        </div>
-                      ) : null;
-                    })}
-                </div>
-              )}
-              {meta.avatar && (
-                <div className="shrink-0">
-                  <img
-                    src={meta.avatar}
-                    alt={meta.avatar}
-                    className="h-[140px] w-[100px]"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-          {content.education.length > 0 && (
-            <div className="w-full space-y-3">
-              <div className="flex w-full items-center space-x-2">
-                <div
-                  style={{
-                    clipPath:
-                      "polygon(0% 50%, 10% 100%, 90% 100%, 100% 50%, 90% 0%, 10% 0%)",
-                  }}
-                  className="shrink-0 rounded-lg bg-slate-500 px-6 py-1 text-lg font-semibold text-white"
-                >
-                  教育背景
-                </div>
-                <div className="h-[1px] w-full grow bg-black"></div>
-              </div>
-              {content.education.map((item) => {
-                return (
-                  <div
-                    key={item.key}
-                    className="w-full space-y-2 px-3"
-                  >
-                    <div className="flex w-full items-center justify-between font-semibold text-slate-500">
-                      <div>{`${item.startDate} - ${item.endDate}`}</div>
-                      <div>{item.school}</div>
-                      <div>{item.major}</div>
-                    </div>
-                    {item.experience && <Viewer content={item.experience} />}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          {content.skill && (
-            <div className="w-full space-y-3">
-              <div className="flex w-full items-center space-x-2">
-                <div
-                  style={{
-                    clipPath:
-                      "polygon(0% 50%, 10% 100%, 90% 100%, 100% 50%, 90% 0%, 10% 0%)",
-                  }}
-                  className="shrink-0 rounded-lg bg-slate-500 px-6 py-1 text-lg font-semibold text-white"
-                >
-                  个人技能
-                </div>
-                <div className="h-[1px] w-full grow bg-black"></div>
-              </div>
-              <div className="w-full space-y-2 px-3">
-                <Viewer content={content.skill} />
-              </div>
-            </div>
-          )}
-          {content.job.length > 0 && (
-            <div className="w-full space-y-3">
-              <div className="flex w-full items-center space-x-2">
-                <div
-                  style={{
-                    clipPath:
-                      "polygon(0% 50%, 10% 100%, 90% 100%, 100% 50%, 90% 0%, 10% 0%)",
-                  }}
-                  className="shrink-0 rounded-lg bg-slate-500 px-6 py-1 text-lg font-semibold text-white"
-                >
-                  工作经历
-                </div>
-                <div className="h-[1px] w-full grow bg-black"></div>
-              </div>
-              {content.job.map((item) => {
-                return (
-                  <div
-                    key={item.key}
-                    className="w-full space-y-2 px-3"
-                  >
-                    <div className="flex w-full items-center justify-between font-semibold text-slate-500">
-                      <div>{`${item.startDate} - ${item.endDate}`}</div>
-                      <div>{item.company}</div>
-                      <div>{item.role}</div>
-                    </div>
-                    {item.experience && <Viewer content={item.experience} />}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          {content.project.length > 0 && (
-            <div className="w-full space-y-3">
-              <div className="flex w-full items-center space-x-2">
-                <div
-                  style={{
-                    clipPath:
-                      "polygon(0% 50%, 10% 100%, 90% 100%, 100% 50%, 90% 0%, 10% 0%)",
-                  }}
-                  className="shrink-0 rounded-lg bg-slate-500 px-6 py-1 text-lg font-semibold text-white"
-                >
-                  项目经验
-                </div>
-                <div className="h-[1px] w-full grow bg-black"></div>
-              </div>
-              {content.project.map((item) => {
-                return (
-                  <div
-                    key={item.key}
-                    className="w-full space-y-2 px-3"
-                  >
-                    <div className="flex w-full items-center justify-between font-semibold text-slate-500">
-                      <div>{item.name}</div>
-                    </div>
-                    {item.description && <Viewer content={item.description} />}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {content.custom.label && content.custom.value && (
-            <div className="w-full space-y-3">
-              <div className="flex w-full items-center space-x-2">
-                <div
-                  style={{
-                    clipPath:
-                      "polygon(0% 50%, 10% 100%, 90% 100%, 100% 50%, 90% 0%, 10% 0%)",
-                  }}
-                  className="shrink-0 rounded-lg bg-slate-500 px-6 py-1 text-lg font-semibold text-white"
-                >
-                  {content.custom.label}
-                </div>
-                <div className="h-[1px] w-full grow bg-black"></div>
-              </div>
-              <div className="w-full space-y-2 px-3">
-                <Viewer content={content.custom.value} />
-              </div>
-            </div>
-          )}
+          <BasicPreview
+            content={content}
+            meta={meta}
+            template="template_kbs"
+          />
+          <EducationPreview
+            content={content}
+            meta={meta}
+            template="template_kbs"
+          />
+          <SkillPreview
+            content={content}
+            meta={meta}
+            template="template_kbs"
+          />
+          <JobPreview
+            content={content}
+            meta={meta}
+            template="template_kbs"
+          />
+          <ProjectPreview
+            content={content}
+            meta={meta}
+            template="template_kbs"
+          />
+          <CustomPreview
+            content={content}
+            meta={meta}
+            template="template_kbs"
+          />
         </>
       )}
     </div>
