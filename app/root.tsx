@@ -1,4 +1,3 @@
-import { NextUIProvider } from "@nextui-org/react";
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import {
   Links,
@@ -6,6 +5,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from "@remix-run/react";
 
 import { Toaster } from "./components/Toaster/provider";
@@ -16,6 +16,7 @@ export const links: LinksFunction = () => {
     {
       rel: "preconnect",
       href: "https://fonts.googleapis.com",
+      crossOrigin: "anonymous",
     },
     {
       rel: "preconnect",
@@ -25,6 +26,7 @@ export const links: LinksFunction = () => {
     {
       rel: "stylesheet",
       href: "https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;600;700&display=swap",
+      crossOrigin: "anonymous",
     },
     {
       rel: "stylesheet",
@@ -41,6 +43,8 @@ export const meta: MetaFunction = () => {
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation();
+
   return (
     <html lang="zh-CN">
       <head>
@@ -52,12 +56,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="min-h-screen bg-custom-secondary">
-        <NextUIProvider>
-          {children}
-          <ScrollRestoration />
-          <Scripts />
-        </NextUIProvider>
+      <body
+        className={`${pathname === "/iframe/preview" ? "bg-custom" : "bg-custom-secondary"}`}
+      >
+        {children}
+        <ScrollRestoration />
+        <Scripts />
         <Toaster />
       </body>
     </html>

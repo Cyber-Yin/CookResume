@@ -24,10 +24,6 @@ export const formatError = (error: unknown) => {
   return "未知错误";
 };
 
-export const validateEmail = (email: string) => {
-  return email.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}$/i);
-};
-
 export const validatePayload = (schema: ZodSchema, data: unknown) => {
   try {
     schema.parse(data);
@@ -58,6 +54,8 @@ export const verifyPassword = (
 };
 
 export const varifyInt = z.number().int().min(1);
+
+export const varifyEmail = z.string().email();
 
 export const checkRichTextOutputIsNull = (value: string) => {
   const regArray = [

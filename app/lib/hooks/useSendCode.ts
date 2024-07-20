@@ -29,11 +29,7 @@ export const useSendCode = (initialCountdown: number) => {
     };
   }, [countdown]);
 
-  const sendCode = async (data: {
-    type: string;
-    user_email: string;
-    new_email?: string;
-  }) => {
+  const sendCode = async (data: { type: string; email?: string }) => {
     try {
       setCountdown(initialCountdown);
 
@@ -50,6 +46,7 @@ export const useSendCode = (initialCountdown: number) => {
 
   return {
     countdown,
+    setCountdown,
     sendCode,
     isButtonDisabled,
   };

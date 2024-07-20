@@ -1,11 +1,11 @@
 import { ActionFunction, json } from "@remix-run/node";
 import { z } from "zod";
 
-import DatabaseInstance from "@/lib/services/prisma.server";
+import { UserService } from "@/lib/services/user.server";
 import { formatError, validatePayload } from "@/lib/utils";
 
 const RequestSchema = z.object({
-  user_id: z.number().int().min(1),
+  resume_id: z.number().int().min(1),
 });
 
 type RequestSchemaType = z.infer<typeof RequestSchema>;
@@ -16,17 +16,14 @@ export const action: ActionFunction = async ({ request }) => {
 
     validatePayload(RequestSchema, data);
 
-    const user = await DatabaseInstance.user.findUnique({
-      select: {
-        verified: true,
-      },
-      where: {
-        id: data.user_id,
-      },
-    });
+    const userService = new UserService();
+
+    await userService.autoSignInByCookie(request);
+
+    await userService.deleteUserResume(data.resume_id);
 
     return json({
-      verified: !user || !user.verified ? false : true,
+      success: true,
     });
   } catch (e) {
     console.log(e);

@@ -2,74 +2,31 @@ import { LoaderFunction, json } from "@remix-run/node";
 import { useLoaderData, useNavigate } from "@remix-run/react";
 import { motion } from "framer-motion";
 import { RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
+import { useMemo } from "react";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 
 import { Button } from "@/components/Button";
-import DatabaseInstance from "@/lib/services/prisma.server";
-import { ResumeContent, ResumeGetResponse } from "@/lib/types/resume";
-import { formatError, varifyInt } from "@/lib/utils";
+import { UserService } from "@/lib/services/user.server";
+import { ResumeGetResponse } from "@/lib/types/resume";
+import { formatError } from "@/lib/utils";
 
 import TemplateKBS from "../dashboard/components/Template/TemplateKBS";
+import { RESUME_TEMPLATE } from "../dashboard/const";
 
 export const loader: LoaderFunction = async ({ params }) => {
   try {
     const { id } = params;
 
     if (!id) {
-      throw new Error("简历 ID 不存在");
+      throw new Error("无效的简历 ID");
     }
 
-    const intId = parseInt(id);
+    const userService = new UserService();
 
-    try {
-      varifyInt.parse(intId);
-    } catch (e) {
-      throw new Error("简历 ID 参数错误");
-    }
-
-    const resume = await DatabaseInstance.resume.findUnique({
-      where: {
-        id: intId,
-      },
-    });
-
-    if (!resume) {
-      throw new Error("简历不存在");
-    }
-
-    if (!resume.published) {
-      throw new Error("简历未发布");
-    }
-
-    const jsonContent: ResumeContent = JSON.parse(resume.content);
-
-    const responseBody: ResumeGetResponse = {
-      meta: {
-        title: resume.title,
-        template: resume.template,
-        published: resume.published,
-        created_at: resume.created_at,
-        updated_at: resume.updated_at,
-      },
-      content: {
-        meta: {
-          avatar: jsonContent.meta?.avatar || "",
-          labelSort: jsonContent.meta?.labelSort || [],
-        },
-        basic: jsonContent?.basic || [],
-        education: jsonContent?.education || [],
-        job: jsonContent?.job || [],
-        project: jsonContent?.project || [],
-        skill: jsonContent?.skill || "",
-        custom: {
-          label: jsonContent?.custom?.label || "",
-          value: jsonContent?.custom?.value || "",
-        },
-      },
-    };
+    const resume = await userService.getPublicResumeByID(id);
 
     return json({
-      data: responseBody,
+      data: userService.formatResume(resume),
     });
   } catch (e) {
     console.log(e);
@@ -86,6 +43,31 @@ export default function PreviewPage() {
   }>();
 
   const navigate = useNavigate();
+
+  const TemplateComponent = useMemo(() => {
+    if (message) return <></>;
+
+    const template = RESUME_TEMPLATE.find(
+      (template) => template.id === data.meta.template,
+    );
+
+    if (template && template.template) {
+      const Template = template.template;
+      return (
+        <Template
+          content={data.content}
+          meta={data.meta}
+        />
+      );
+    } else {
+      return (
+        <TemplateKBS
+          content={data.content}
+          meta={data.meta}
+        />
+      );
+    }
+  }, [data]);
 
   if (message) {
     return (
@@ -142,10 +124,7 @@ export default function PreviewPage() {
                 }}
                 className="w-[794px] bg-white p-6"
               >
-                <TemplateKBS
-                  content={data.content}
-                  meta={data.meta}
-                />
+                {TemplateComponent}
               </motion.div>
             </TransformComponent>
           </div>

@@ -20,7 +20,7 @@ function useResizeObserver() {
         resizeObserver.unobserve(ref.current);
       }
     };
-  }, [ref]);
+  }, [ref.current]);
 
   return { ref, width };
 }

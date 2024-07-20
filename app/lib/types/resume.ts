@@ -1,14 +1,25 @@
+export type ResumeEntity = {
+  id: number;
+  title: string;
+  content: string;
+  published: number;
+  createdAt: number;
+  updatedAt: number;
+  template: number;
+  avatar: string;
+};
+
 export type ResumeMetaData = {
-  avatar?: string;
   labelSort: string[];
 };
 
 export type ResumeMeta = {
   title: string;
+  avatar: string;
   template: number;
-  published: number;
-  created_at: number;
-  updated_at: number;
+  published: boolean;
+  createdAt: number;
+  updatedAt: number;
 };
 
 export type ResumeBasicData = {

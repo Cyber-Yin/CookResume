@@ -9,14 +9,16 @@ import { Button } from "@/components/Button";
 import { FormInput, PasswordInput } from "@/components/Input";
 import PageCard from "@/components/PageCard";
 import { useToast } from "@/components/Toaster/hooks";
-import { checkUserIsLogin } from "@/lib/services/auth.server";
+import { UserService } from "@/lib/services/user.server";
 import { formatError } from "@/lib/utils";
 import { FormValidator } from "@/lib/utils/form-validator";
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const { isLogin } = await checkUserIsLogin(request);
+  const userService = new UserService();
 
-  if (isLogin) {
+  const userID = await userService.getUserIDByCookie(request);
+
+  if (userID) {
     return redirect("/dashboard");
   }
 
@@ -38,7 +40,7 @@ export default function SignInPage() {
     },
   });
 
-  const canLogin = useMemo(() => {
+  const canSubmit = useMemo(() => {
     const errorArray = Object.values(formState.error);
 
     return errorArray.every((error) => !error);
@@ -149,7 +151,7 @@ export default function SignInPage() {
           </div>
         </div>
         <Button
-          disabled={!canLogin || loginLoading}
+          disabled={!canSubmit || loginLoading}
           className="w-full sm:max-w-[360px]"
           onClick={() => login()}
         >

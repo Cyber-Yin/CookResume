@@ -13,14 +13,16 @@ import SuccessTip from "@/components/SuccessTip";
 import { useToast } from "@/components/Toaster/hooks";
 import { usePasswordSecurity } from "@/lib/hooks/usePasswordSecurity";
 import { useSendCode } from "@/lib/hooks/useSendCode";
-import { checkUserIsLogin } from "@/lib/services/auth.server";
+import { UserService } from "@/lib/services/user.server";
 import { formatError } from "@/lib/utils";
 import { FormValidator } from "@/lib/utils/form-validator";
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const { isLogin } = await checkUserIsLogin(request);
+  const userService = new UserService();
 
-  if (isLogin) {
+  const userID = await userService.getUserIDByCookie(request);
+
+  if (userID) {
     return redirect("/dashboard");
   }
 
@@ -51,7 +53,7 @@ export default function ResetPasswordPage() {
 
   const { passwordSecurity } = usePasswordSecurity(formState.data.password);
 
-  const canResetPassword = useMemo(() => {
+  const canSubmit = useMemo(() => {
     const errorArray = Object.values(formState.error);
 
     return errorArray.every((error) => !error);
@@ -66,13 +68,15 @@ export default function ResetPasswordPage() {
 
     try {
       const resp = await axios.post<{
-        registered: boolean;
+        data: {
+          registered: boolean;
+        };
       }>("/api/account/check-register", {
         type: "email",
         value: formState.data.email,
       });
 
-      if (!resp.data.registered) {
+      if (!resp.data.data.registered) {
         setFormState((prev) => ({
           data: prev.data,
           error: {
@@ -195,16 +199,25 @@ export default function ResetPasswordPage() {
                 }}
               />
               <Button
-                disabled={
-                  isButtonDisabled ||
-                  !formState.data.email ||
-                  !!formState.error.email
-                }
-                onClick={() =>
+                disabled={isButtonDisabled}
+                onClick={() => {
+                  try {
+                    FormValidator.emailValidator(formState.data.email);
+                  } catch (e) {
+                    setFormState((prev) => ({
+                      ...prev,
+                      error: { ...prev.error, email: formatError(e) },
+                    }));
+                    return;
+                  }
+
                   sendCode({
                     type: "forgotPassword",
-                    user_email: formState.data.email,
-                  })
+                    email: formState.data.email,
+                  });
+                }}
+                className={
+                  formState.error.verificationCode ? "-translate-y-[22px]" : ""
                 }
               >
                 {countdown > 0 ? countdown : "获取验证码"}
@@ -263,7 +276,7 @@ export default function ResetPasswordPage() {
             />
           </div>
           <Button
-            disabled={!canResetPassword || resetPasswordLoading}
+            disabled={!canSubmit || resetPasswordLoading}
             className="w-full sm:max-w-[360px]"
             onClick={() => handleSubmit()}
           >

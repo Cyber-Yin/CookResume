@@ -12,15 +12,15 @@ interface ResumeContentHook {
 export const useResumeContent = create<ResumeContentHook>((set) => {
   return {
     meta: {
+      avatar: "",
       title: "",
       template: 0,
-      published: 0,
-      created_at: 0,
-      updated_at: 0,
+      published: false,
+      createdAt: 0,
+      updatedAt: 0,
     },
     content: {
       meta: {
-        avatar: "",
         labelSort: [],
       },
       basic: [],

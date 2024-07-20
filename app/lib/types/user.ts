@@ -1,7 +1,7 @@
-export type UserResponse = {
+export type UserEntity = {
   id: number;
-  user_name: string;
+  name: string;
   email: string;
-  avatar: string | null;
-  verified: number;
+  avatar: string;
+  banned: boolean;
 };

@@ -8,12 +8,12 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/Button";
 import { ScrollArea } from "@/components/ScrollArea";
 import { FADE_IN_ANIMATION } from "@/lib/const/animation";
-import { RESUME_TEMPLATE } from "@/lib/const/resume-template";
 import { cn } from "@/lib/utils";
 import { useFetchResume } from "@/routes/dashboard.resume.edit.$id/hooks/useFetchResume";
 import useResizeObserver from "@/routes/dashboard.resume.edit.$id/hooks/useResizeObserver";
 import { useResumeContent } from "@/routes/dashboard.resume.edit.$id/hooks/useResumeContent";
 import { useSubmitResumeSection } from "@/routes/dashboard.resume.edit.$id/hooks/useSubmitResumeSection";
+import { RESUME_TEMPLATE } from "@/routes/dashboard/const";
 
 const TemplateEditor: React.FC = () => {
   const { resumeInfo, resumeLoading, resumeValidating } = useFetchResume();
@@ -68,27 +68,27 @@ const TemplateEditor: React.FC = () => {
               animate="visible"
               custom={index}
               onClick={() => {
-                setSelectedTemplate(index);
+                setSelectedTemplate(item.id);
               }}
               className={cn(
                 "group relative cursor-pointer overflow-hidden rounded-md border-2 border-custom transition-colors hover:border-primary",
                 {
-                  "border-primary": selectedTemplate === index,
+                  "border-primary": selectedTemplate === item.id,
                 },
               )}
               key={item.id}
             >
               <img
                 className={cn(
-                  "h-full w-full transition-all group-hover:brightness-90",
+                  "h-full w-full object-cover object-top transition-all group-hover:brightness-90",
                   {
-                    "brightness-90": selectedTemplate === index,
+                    "brightness-90": selectedTemplate === item.id,
                   },
                 )}
                 src={item.img}
                 alt={item.name}
               />
-              {selectedTemplate === index && (
+              {selectedTemplate === item.id && (
                 <div className="absolute right-2 top-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary p-1">
                   <Check className="h-full w-full text-white" />
                 </div>

@@ -1,17 +1,18 @@
 import { ActionFunction, json } from "@remix-run/node";
-import { sha256 } from "js-sha256";
 import { z } from "zod";
 
-import DatabaseInstance from "@/lib/services/prisma.server";
-import { formatError, generateRandomSalt, validatePayload } from "@/lib/utils";
+import { EmailService } from "@/lib/services/email.server";
+import { UserService } from "@/lib/services/user.server";
+import { formatError, validatePayload } from "@/lib/utils";
 
 const RequestSchema = z.object({
-  userName: z
+  user_name: z
     .string()
     .min(3)
     .max(12)
     .regex(/^[a-zA-Z][a-zA-Z0-9_]*$/),
   email: z.string().email(),
+  verification_code: z.string().length(6),
   password: z
     .string()
     .min(8)
@@ -26,37 +27,43 @@ export const action: ActionFunction = async ({ request }) => {
 
     validatePayload(RequestSchema, data);
 
-    const user = await DatabaseInstance.user.findFirst({
-      select: {
-        id: true,
-      },
-      where: {
-        OR: [
-          {
-            user_name: data.userName,
-          },
-          {
-            email: data.email,
-          },
-        ],
-      },
+    const userService = new UserService();
+
+    // 检查用户是否已注册
+    const registered = await userService.checkUserIsRegister({
+      name: data.user_name,
+      email: data.email,
+      both: true,
     });
 
-    if (user) {
+    if (registered) {
       throw new Error("该账号已被注册");
     }
 
-    const salt = generateRandomSalt();
+    // 注册邮箱验证码确认
+    const emailService = new EmailService();
 
-    await DatabaseInstance.user.create({
-      data: {
-        user_name: data.userName,
-        email: data.email,
-        password: sha256(data.password + salt),
-        salt,
-        verified: 0,
-      },
+    const verificationContent = await emailService.getVerificationContentByCode(
+      data.verification_code,
+    );
+
+    if (verificationContent.type !== "signUp") {
+      throw new Error("验证码类型错误");
+    }
+
+    if (verificationContent.email !== data.email) {
+      throw new Error("验证码邮箱与提交邮箱不符");
+    }
+
+    // 用户注册
+    await userService.signUp({
+      name: data.user_name,
+      email: data.email,
+      password: data.password,
     });
+
+    // 删除验证码缓存
+    await emailService.deleteVerificationCodeCache(data.verification_code);
 
     return json({
       success: true,
