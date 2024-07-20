@@ -2,6 +2,7 @@ import BasicEditor from "../components/Editor/Basic";
 import CustomEditor from "../components/Editor/Custom";
 import EducationEditor from "../components/Editor/Education";
 import JobEditor from "../components/Editor/Job";
+import LabelsortEditor from "../components/Editor/Labelsort";
 import MetaEditor from "../components/Editor/Meta";
 import ProjectEditor from "../components/Editor/Project";
 import SkillEditor from "../components/Editor/Skill";
@@ -12,6 +13,11 @@ export const DEFAULT_MENU_ITEMS = [
     key: "meta",
     label: "简历信息",
     editor: MetaEditor,
+  },
+  {
+    key: "labelsort",
+    label: "标签排序",
+    editor: LabelsortEditor,
   },
   {
     key: "template",

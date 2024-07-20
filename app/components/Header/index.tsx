@@ -1,7 +1,9 @@
 import { useNavigate } from "@remix-run/react";
+import axios from "axios";
 import { LogOut, NotepadText, User } from "lucide-react";
 
-import { UserResponse } from "@/lib/types/user";
+import { UserEntity } from "@/lib/types/user";
+import { formatError } from "@/lib/utils";
 
 import { Avatar, AvatarFallback, AvatarImage } from "../Avatar";
 import { Button } from "../Button";
@@ -13,12 +15,28 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../Sheet";
+import { useToast } from "../Toaster/hooks";
 import { VisuallyHidden } from "../VisuallyHidden";
 
 const Header: React.FC<{
-  user?: UserResponse;
+  user?: UserEntity;
 }> = ({ user }) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await axios.post("/api/account/logout");
+      navigate("/sign-in");
+    } catch (e) {
+      toast({
+        title: "退出登录失败",
+        description: formatError(e),
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
+  };
 
   return (
     <>
@@ -34,7 +52,7 @@ const Header: React.FC<{
               <Avatar className="hover:cursor-pointer">
                 <AvatarImage src={user.avatar || ""} />
                 <AvatarFallback>
-                  {user.user_name.slice(0, 1).toUpperCase()}
+                  {user.name.slice(0, 1).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             </SheetTrigger>
@@ -49,12 +67,10 @@ const Header: React.FC<{
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={user.avatar || ""} />
                   <AvatarFallback>
-                    {user.user_name.slice(0, 1).toUpperCase()}
+                    {user.name.slice(0, 1).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="font-semibold text-custom">
-                  {user.user_name}
-                </div>
+                <div className="font-semibold text-custom">{user.name}</div>
               </div>
               <hr className="my-4 border-t-[1.5px] border-custom" />
               <div className="space-y-1 text-custom">
@@ -75,7 +91,10 @@ const Header: React.FC<{
               </div>
               <hr className="my-4 border-t-[1.5px] border-custom" />
               <div className="space-y-1 text-custom">
-                <div className="flex cursor-pointer items-center space-x-2 rounded-md px-4 py-1.5 transition-colors hover:bg-custom-hover">
+                <div
+                  onClick={handleLogout}
+                  className="flex cursor-pointer items-center space-x-2 rounded-md px-4 py-1.5 transition-colors hover:bg-custom-hover"
+                >
                   <LogOut className="h-4 w-4" />
                   <div className="text-sm">退出登录</div>
                 </div>

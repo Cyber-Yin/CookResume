@@ -9,8 +9,8 @@ import { FormInput } from "@/components/Input";
 import { Label } from "@/components/Label";
 import { useToast } from "@/components/Toaster/hooks";
 import { FADE_IN_ANIMATION } from "@/lib/const/animation";
-import { RESUME_TEMPLATE } from "@/lib/const/resume-template";
 import { cn, formatError } from "@/lib/utils";
+import { RESUME_TEMPLATE } from "@/routes/dashboard/const";
 
 const CreateResumeForm = () => {
   const { toast } = useToast();
@@ -87,27 +87,27 @@ const CreateResumeForm = () => {
               animate="visible"
               custom={index}
               onClick={() => {
-                setFormState({ ...formState, template: index });
+                setFormState({ ...formState, template: item.id });
               }}
               className={cn(
                 "group relative cursor-pointer overflow-hidden rounded-md border-2 border-custom transition-colors hover:border-primary",
                 {
-                  "border-primary": formState.template === index,
+                  "border-primary": formState.template === item.id,
                 },
               )}
               key={item.id}
             >
               <img
                 className={cn(
-                  "h-full w-full transition-all group-hover:brightness-90",
+                  "h-full w-full object-cover object-top transition-all group-hover:brightness-90",
                   {
-                    "brightness-90": formState.template === index,
+                    "brightness-90": formState.template === item.id,
                   },
                 )}
                 src={item.img}
                 alt={item.name}
               />
-              {formState.template === index && (
+              {formState.template === item.id && (
                 <div className="absolute right-2 top-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary p-1">
                   <Check className="h-full w-full text-white" />
                 </div>
@@ -118,9 +118,9 @@ const CreateResumeForm = () => {
       </div>
       <div className="flex w-full items-center justify-between">
         <Button
+          variant="destructive"
           disabled={submitLoading}
           onClick={() => navigate(-1)}
-          className="border border-custom bg-custom-primary text-custom hover:border-primary hover:text-primary"
         >
           取消
         </Button>

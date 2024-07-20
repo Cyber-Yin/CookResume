@@ -20,6 +20,16 @@ import { motion } from "framer-motion";
 import { Loader2, Menu, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/AlertDialog";
 import { Button } from "@/components/Button";
 import {
   Dialog,
@@ -101,6 +111,7 @@ type SortableItemProps = {
   };
   formState: BasicDataFormState;
   setFormState: React.Dispatch<React.SetStateAction<BasicDataFormState>>;
+  onItemDelete: (key: string) => void;
 };
 
 type SortableListProps = {
@@ -109,9 +120,15 @@ type SortableListProps = {
   formState: BasicDataFormState;
   setFormState: React.Dispatch<React.SetStateAction<BasicDataFormState>>;
   onSortEnd: (event: DragEndEvent) => void;
+  onItemDelete: (key: string) => void;
 };
 
-const SortableItem = ({ item, formState, setFormState }: SortableItemProps) => {
+const SortableItem = ({
+  item,
+  formState,
+  setFormState,
+  onItemDelete,
+}: SortableItemProps) => {
   const {
     attributes,
     listeners,
@@ -179,12 +196,7 @@ const SortableItem = ({ item, formState, setFormState }: SortableItemProps) => {
           </div>
           {item.isCustom && (
             <Trash2
-              onClick={() => {
-                setFormState((prev) => {
-                  const { [item.key]: _, ...rest } = prev;
-                  return rest;
-                });
-              }}
+              onClick={() => onItemDelete(item.key)}
               className="h-3.5 w-3.5 cursor-pointer text-danger-light"
             />
           )}
@@ -228,12 +240,7 @@ const SortableItem = ({ item, formState, setFormState }: SortableItemProps) => {
         </div>
         {item.isCustom && (
           <Trash2
-            onClick={() => {
-              setFormState((prev) => {
-                const { [item.key]: _, ...rest } = prev;
-                return rest;
-              });
-            }}
+            onClick={() => onItemDelete(item.key)}
             className="h-3.5 w-3.5 cursor-pointer text-danger-light"
           />
         )}
@@ -248,6 +255,7 @@ const SortableList = ({
   formState,
   setFormState,
   onSortEnd,
+  onItemDelete,
 }: SortableListProps) => {
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -276,6 +284,7 @@ const SortableList = ({
         >
           {items.map((item) => (
             <SortableItem
+              onItemDelete={onItemDelete}
               key={item.key}
               item={item}
               formState={formState}
@@ -368,6 +377,24 @@ const BasicEditor: React.FC = () => {
     });
   };
 
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertKey, setAlertKey] = useState("");
+
+  const handleItemDelete = () => {
+    if (!alertKey) {
+      setAlertOpen(false);
+      return;
+    }
+
+    setFormState((prev) => {
+      const { [alertKey]: _, ...rest } = prev;
+      return rest;
+    });
+
+    setAlertOpen(false);
+    setAlertKey("");
+  };
+
   return (
     <div
       ref={editorRef}
@@ -379,6 +406,10 @@ const BasicEditor: React.FC = () => {
           items={sortedItems}
           formState={formState}
           setFormState={setFormState}
+          onItemDelete={(key) => {
+            setAlertKey(key);
+            setAlertOpen(true);
+          }}
           onSortEnd={(event) =>
             handleEditorSortEnd(event, sortedItems, formState, setFormState)
           }
@@ -420,6 +451,24 @@ const BasicEditor: React.FC = () => {
           }));
         }}
       />
+      <AlertDialog open={alertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确定删除</AlertDialogTitle>
+            <AlertDialogDescription>
+              确定删除自定义词条？该操作不可恢复
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setAlertOpen(false)}>
+              取消
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleItemDelete}>
+              确定
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
@@ -456,16 +505,8 @@ const AddItemModal: React.FC<{
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(open) => {
-        if (!open) {
-          onClose();
-          clear();
-        }
-      }}
-    >
-      <DialogContent>
+    <Dialog open={open}>
+      <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>添加词条</DialogTitle>
           <VisuallyHidden asChild>
@@ -493,7 +534,16 @@ const AddItemModal: React.FC<{
           />
         </div>
         <DialogFooter>
-          <Button onClick={handleSubmit}>保存</Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              onClose();
+              clear();
+            }}
+          >
+            取消
+          </Button>
+          <Button onClick={handleSubmit}>添加</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

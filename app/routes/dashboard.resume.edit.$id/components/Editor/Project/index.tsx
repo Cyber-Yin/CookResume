@@ -20,6 +20,16 @@ import { motion } from "framer-motion";
 import { Loader2, Menu, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/AlertDialog";
 import { Button } from "@/components/Button";
 import {
   Dialog,
@@ -222,6 +232,24 @@ const ProjectEditor: React.FC = () => {
     });
   };
 
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertKey, setAlertKey] = useState("");
+
+  const handleItemDelete = () => {
+    if (!alertKey) {
+      setAlertOpen(false);
+      return;
+    }
+
+    setFormState((prev) => {
+      const { [alertKey]: _, ...rest } = prev;
+      return rest;
+    });
+
+    setAlertOpen(false);
+    setAlertKey("");
+  };
+
   return (
     <div className="flex h-[calc(100vh-4rem)] w-full flex-col">
       <ScrollArea className="h-[calc(100vh-7.5rem)]">
@@ -232,12 +260,10 @@ const ProjectEditor: React.FC = () => {
         ) : (
           <SortableList
             items={sortedItems}
-            onItemDelete={(key) =>
-              setFormState((prev) => {
-                const { [key]: _, ...rest } = prev;
-                return rest;
-              })
-            }
+            onItemDelete={(key) => {
+              setAlertKey(key);
+              setAlertOpen(true);
+            }}
             onItemEdit={(item) =>
               setEditItem({
                 key: item.key,
@@ -306,6 +332,24 @@ const ProjectEditor: React.FC = () => {
           }));
         }}
       />
+      <AlertDialog open={alertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确定删除</AlertDialogTitle>
+            <AlertDialogDescription>
+              确定删除项目经验？该操作不可恢复
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setAlertOpen(false)}>
+              取消
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleItemDelete}>
+              确定
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
@@ -354,15 +398,7 @@ const AddProjectModal: React.FC<{
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(open) => {
-        if (!open) {
-          onClose();
-          clear();
-        }
-      }}
-    >
+    <Dialog open={open}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>添加项目经验</DialogTitle>
@@ -396,6 +432,15 @@ const AddProjectModal: React.FC<{
           </div>
         </ScrollArea>
         <DialogFooter>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              onClose();
+              clear();
+            }}
+          >
+            取消
+          </Button>
           <Button onClick={handleSubmit}>添加</Button>
         </DialogFooter>
       </DialogContent>
@@ -459,15 +504,7 @@ const ModifyProjectModal: React.FC<{
   }, [defaultValue]);
 
   return (
-    <Dialog
-      open={Boolean(defaultValue)}
-      onOpenChange={(open) => {
-        if (!open) {
-          onClose();
-          clear();
-        }
-      }}
-    >
+    <Dialog open={Boolean(defaultValue)}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>更改项目经验</DialogTitle>
@@ -501,6 +538,15 @@ const ModifyProjectModal: React.FC<{
           </div>
         </ScrollArea>
         <DialogFooter>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              onClose();
+              clear();
+            }}
+          >
+            取消
+          </Button>
           <Button onClick={handleSubmit}>更改</Button>
         </DialogFooter>
       </DialogContent>

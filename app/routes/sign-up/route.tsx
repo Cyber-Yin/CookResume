@@ -1,7 +1,6 @@
 import { LoaderFunction, json, redirect } from "@remix-run/node";
 import { useNavigate } from "@remix-run/react";
 import axios from "axios";
-import { motion } from "framer-motion";
 import { sha256 } from "js-sha256";
 import { Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -15,14 +14,17 @@ import PasswordTip from "@/components/PasswordTip";
 import SuccessTip from "@/components/SuccessTip";
 import { useToast } from "@/components/Toaster/hooks";
 import { usePasswordSecurity } from "@/lib/hooks/usePasswordSecurity";
-import { checkUserIsLogin } from "@/lib/services/auth.server";
+import { useSendCode } from "@/lib/hooks/useSendCode";
+import { UserService } from "@/lib/services/user.server";
 import { cn, formatError } from "@/lib/utils";
 import { FormValidator } from "@/lib/utils/form-validator";
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const { isLogin } = await checkUserIsLogin(request);
+  const userService = new UserService();
 
-  if (isLogin) {
+  const userID = await userService.getUserIDByCookie(request);
+
+  if (userID) {
     return redirect("/dashboard");
   }
 
@@ -32,11 +34,13 @@ export const loader: LoaderFunction = async ({ request }) => {
 export default function SignUpPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { countdown, sendCode, isButtonDisabled } = useSendCode(90);
 
   const [formState, setFormState] = useState({
     data: {
       userName: "",
       email: "",
+      verificationCode: "",
       password: "",
       passwordConfirm: "",
       readPolicy: false,
@@ -44,6 +48,7 @@ export default function SignUpPage() {
     error: {
       userName: "",
       email: "",
+      verificationCode: "",
       password: "",
       passwordConfirm: "",
       readPolicy: "",
@@ -56,7 +61,7 @@ export default function SignUpPage() {
 
   const { passwordSecurity } = usePasswordSecurity(formState.data.password);
 
-  const canRegister = useMemo(() => {
+  const canSubmit = useMemo(() => {
     const errorArray = Object.values(formState.error);
 
     return errorArray.every((error) => !error);
@@ -72,6 +77,13 @@ export default function SignUpPage() {
       {
         validator: () => FormValidator.emailValidator(formState.data.email),
         field: "email",
+      },
+      {
+        validator: () =>
+          FormValidator.verificationCodeValidator(
+            formState.data.verificationCode,
+          ),
+        field: "verificationCode",
       },
       {
         validator: () =>
@@ -115,8 +127,9 @@ export default function SignUpPage() {
       setRegisterLoading(true);
 
       await axios.post("/api/account/sign-up", {
-        userName: formState.data.userName,
+        user_name: formState.data.userName,
         email: formState.data.email,
+        verification_code: formState.data.verificationCode,
         password: sha256(formState.data.password),
       });
 
@@ -140,13 +153,13 @@ export default function SignUpPage() {
 
     try {
       const resp = await axios.post<{
-        registered: boolean;
+        data: { registered: boolean };
       }>("/api/account/check-register", {
         type,
         value: formState.data[type === "username" ? "userName" : "email"],
       });
 
-      if (resp.data.registered) {
+      if (resp.data.data.registered) {
         setFormState((prev) => ({
           data: prev.data,
           error: {
@@ -207,6 +220,53 @@ export default function SignUpPage() {
                   }));
                 }}
               />
+              <div className="flex items-end space-x-2">
+                <FormInput
+                  className="grow"
+                  label="验证码"
+                  value={formState.data.verificationCode}
+                  error={formState.error.verificationCode}
+                  type="number"
+                  onValueChange={(v, e) => {
+                    setFormState((prev) => ({
+                      data: {
+                        ...prev.data,
+                        verificationCode: v,
+                      },
+                      error: {
+                        ...prev.error,
+                        verificationCode: e,
+                      },
+                    }));
+                  }}
+                />
+                <Button
+                  disabled={isButtonDisabled}
+                  onClick={() => {
+                    try {
+                      FormValidator.emailValidator(formState.data.email);
+                    } catch (e) {
+                      setFormState((prev) => ({
+                        ...prev,
+                        error: { ...prev.error, email: formatError(e) },
+                      }));
+                      return;
+                    }
+
+                    sendCode({
+                      type: "signUp",
+                      email: formState.data.email,
+                    });
+                  }}
+                  className={
+                    formState.error.verificationCode
+                      ? "-translate-y-[22px]"
+                      : ""
+                  }
+                >
+                  {countdown > 0 ? countdown : "获取验证码"}
+                </Button>
+              </div>
               <PasswordInput
                 label="密码"
                 placeholder="请输入密码"
@@ -296,7 +356,7 @@ export default function SignUpPage() {
             </div>
             <div className="flex w-full flex-col items-center space-y-2">
               <Button
-                disabled={registerLoading || !canRegister}
+                disabled={registerLoading || !canSubmit}
                 className="w-full sm:max-w-[360px]"
                 onClick={() => register()}
               >

@@ -1,11 +1,12 @@
 import { ActionFunction, json } from "@remix-run/node";
+import { createHash } from "crypto";
 import { createTransport } from "nodemailer";
 import { z } from "zod";
 
 import { SMTP_PASS, SMTP_USER } from "@/lib/const/email.server";
 import { RedisKeyGenerator } from "@/lib/const/redis-key";
-import DatabaseInstance from "@/lib/services/prisma.server";
 import RedisInstance from "@/lib/services/redis.server";
+import { UserService } from "@/lib/services/user.server";
 import {
   formatError,
   generateVerificationCode,
@@ -13,14 +14,8 @@ import {
 } from "@/lib/utils";
 
 const RequestSchema = z.object({
-  type: z.enum([
-    "forgotPassword",
-    "verifyEmail",
-    "changeEmail",
-    "changePassword",
-  ]),
-  user_email: z.string().email(),
-  new_email: z.string().email().optional(),
+  type: z.enum(["forgotPassword", "signUp", "changeEmail", "changePassword"]),
+  email: z.string().email().optional(),
 });
 
 type RequestSchemaType = z.infer<typeof RequestSchema>;
@@ -31,27 +26,33 @@ export const action: ActionFunction = async ({ request }) => {
 
     validatePayload(RequestSchema, data);
 
-    if (data.type === "changeEmail" && !data.new_email) {
-      throw new Error("新邮箱不能为空");
+    let email = "";
+    let userID = 0;
+
+    const userService = new UserService();
+
+    if (["signUp", "forgotPassword"].includes(data.type)) {
+      email = data.email || "";
+    } else {
+      await userService.autoSignInByCookie(request);
+
+      if (data.type === "changeEmail") {
+        email = data.email || "";
+      } else {
+        email = userService.user!.email;
+      }
+
+      userID = userService.user!.id;
     }
 
-    const user = await DatabaseInstance.user.findUnique({
-      select: {
-        id: true,
-        email: true,
-        verified: true,
-      },
-      where: {
-        email: data.user_email,
-      },
-    });
-
-    if (!user) {
-      throw new Error("用户不存在");
+    if (!email) {
+      throw new Error("邮箱不能为空");
     }
+
+    const emailMD5 = createHash("md5").update(email).digest("hex");
 
     const emailInterval = await RedisInstance.get(
-      RedisKeyGenerator.generateEmailIntervalKey(user.id),
+      RedisKeyGenerator.generateEmailIntervalKey(emailMD5),
     );
 
     if (emailInterval) {
@@ -59,8 +60,7 @@ export const action: ActionFunction = async ({ request }) => {
     }
 
     const transporter = createTransport({
-      service: "Gmail",
-      host: "smtp.gmail.com",
+      host: "smtp.qq.com",
       port: 465,
       secure: true,
       auth: {
@@ -73,7 +73,7 @@ export const action: ActionFunction = async ({ request }) => {
 
     const mailOptions = {
       from: SMTP_USER,
-      to: data.type === "changeEmail" ? data.new_email : user.email,
+      to: email,
       subject: "酷客简历验证码",
       html: `<p>您的验证码是：${verificationCode}</p>
       <p>如果您没有进行此操作，请忽略此邮件。</p>
@@ -84,23 +84,20 @@ export const action: ActionFunction = async ({ request }) => {
 
     const content: {
       type: string;
-      user_id: number;
-      email?: string;
+      email: string;
     } = {
       type: data.type,
-      user_id: user.id,
+      email,
     };
 
-    if (data.type === "changeEmail") {
-      content.email = data.new_email;
-    }
+    await transporter.sendMail(mailOptions);
 
     await RedisInstance.multi()
       .set(
-        RedisKeyGenerator.generateEmailIntervalKey(user.id),
+        RedisKeyGenerator.generateEmailIntervalKey(emailMD5),
         "true",
         "EX",
-        60 * 1,
+        30,
         "NX",
       )
       .set(
@@ -111,10 +108,8 @@ export const action: ActionFunction = async ({ request }) => {
       )
       .exec();
 
-    await transporter.sendMail(mailOptions);
-
     return json({
-      message: "发送成功",
+      success: true,
     });
   } catch (e) {
     console.log(e);

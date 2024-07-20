@@ -23,6 +23,7 @@ import { ScrollArea } from "@/components/ScrollArea";
 import { cn, sleep } from "@/lib/utils";
 
 import TemplateKBS from "../dashboard/components/Template/TemplateKBS";
+import { RESUME_TEMPLATE } from "../dashboard/const";
 import MenuBar, { MenuBarVariants } from "./components/MenuBar";
 import { DEFAULT_MENU_ITEMS } from "./const";
 import { useResumeContent } from "./hooks/useResumeContent";
@@ -50,38 +51,29 @@ const DesktopPanel: React.FC = () => {
     return DEFAULT_MENU_ITEMS.find((item) => item.key === tab)?.editor;
   }, [tab]);
 
-  // const handleExport = async () => {
-  //   const node = document.getElementById("resume_viewer");
+  const TemplateComponent = useMemo(() => {
+    const template = RESUME_TEMPLATE.find(
+      (template) => template.id === meta.template,
+    );
 
-  //   if (!node) return;
+    if (template && template.template) {
+      const Template = template.template;
 
-  //   try {
-  //     const svg = await toSvg(node);
-
-  //     const svgString = decodeURIComponent(
-  //       svg.replace("data:image/svg+xml;charset=utf-8,", ""),
-  //     );
-
-  //     const svgBlob = new Blob([svgString], {
-  //       type: "image/svg+xml;charset=utf-8",
-  //     });
-
-  //     const svgUrl = URL.createObjectURL(svgBlob);
-  //     const printWindow = window.open(svgUrl, "_blank");
-
-  //     if (!printWindow) return;
-
-  //     printWindow.onload = () => {
-  //       printWindow.print();
-  //       printWindow.onafterprint = function () {
-  //         URL.revokeObjectURL(svgUrl);
-  //         printWindow.close();
-  //       };
-  //     };
-  //   } catch (error) {
-  //     console.error("Failed to render canvas:", error);
-  //   }
-  // };
+      return (
+        <Template
+          content={content}
+          meta={meta}
+        />
+      );
+    } else {
+      return (
+        <TemplateKBS
+          content={content}
+          meta={meta}
+        />
+      );
+    }
+  }, [content, meta]);
 
   const handleExport = async () => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
@@ -178,10 +170,7 @@ const DesktopPanel: React.FC = () => {
                       }}
                       className="w-[794px] bg-white p-6"
                     >
-                      <TemplateKBS
-                        content={content}
-                        meta={meta}
-                      />
+                      {TemplateComponent}
                     </motion.div>
                   </TransformComponent>
                 </div>

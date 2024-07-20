@@ -2,40 +2,26 @@ import { LoaderFunction, json, redirect } from "@remix-run/node";
 import { Outlet, useLoaderData } from "@remix-run/react";
 
 import Header from "@/components/Header";
-import { checkUserIsLogin } from "@/lib/services/auth.server";
-import DatabaseInstance from "@/lib/services/prisma.server";
-import { UserResponse } from "@/lib/types/user";
+import { UserService } from "@/lib/services/user.server";
+import { UserEntity } from "@/lib/types/user";
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const { isLogin, userId } = await checkUserIsLogin(request);
+  const userService = new UserService();
 
-  if (!isLogin || !userId) {
+  try {
+    await userService.autoSignInByCookie(request);
+  } catch (e) {}
+
+  if (!userService.user) {
     return redirect("/sign-in");
   }
 
-  const user = await DatabaseInstance.user.findUnique({
-    select: {
-      id: true,
-      user_name: true,
-      email: true,
-      avatar: true,
-      verified: true,
-    },
-    where: {
-      id: userId,
-    },
-  });
-
-  if (!user) {
-    return redirect("/sign-in");
-  }
-
-  return json({ user });
+  return json({ user: userService.user });
 };
 
 export default function DashboardPage() {
   const { user } = useLoaderData<{
-    user: UserResponse;
+    user: UserEntity;
   }>();
 
   return (

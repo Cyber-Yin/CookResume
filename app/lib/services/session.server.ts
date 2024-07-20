@@ -10,14 +10,14 @@ const sessionStorage = createCookieSessionStorage({
     httpOnly: true,
     secrets: [SESSION_SECRET],
     secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24 * 30,
+    maxAge: 60 * 60 * 24 * 365,
   },
 });
 
-export const createUserSession = async (userId: number, token: string) => {
+export const createUserSession = async (userID: number, token: string) => {
   const session = await sessionStorage.getSession();
 
-  session.set("userId", userId);
+  session.set("userID", userID);
   session.set("token", token);
 
   const cookieHeader = await sessionStorage.commitSession(session);

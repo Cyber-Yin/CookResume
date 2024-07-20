@@ -42,6 +42,13 @@
   html {
     @apply scroll-smooth;
     font-family: "MiSans", "Noto Sans SC", sans-serif;
+    /* font-family: "Noto Sans SC", sans-serif; */
+    scrollbar-width: none; /* 对于 Firefox */
+    -ms-overflow-style: none; /* 对于 IE 和 Edge */
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   .aspect-image {
@@ -59,5 +66,36 @@
 
   [data-radix-scroll-area-viewport] > * {
     display: block !important;
+  }
+
+  .viewer p {
+    @apply text-justify text-sm leading-6;
+  }
+
+  .editor p {
+    @apply text-justify text-sm leading-6;
+  }
+
+  .viewer ul {
+    @apply list-disc pl-5 text-justify text-sm leading-6;
+  }
+
+  .editor ul {
+    @apply list-disc pl-5 text-justify text-sm leading-6;
+  }
+
+  .viewer ol {
+    @apply list-decimal pl-5 text-justify text-sm leading-6;
+  }
+
+  .editor ol {
+    @apply list-decimal pl-5 text-justify text-sm leading-6;
+  }
+
+  @media print {
+    body,
+    html {
+      background-color: "#fff";
+    }
   }
 }
