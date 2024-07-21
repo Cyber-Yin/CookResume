@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/Dialog";
 import { VisuallyHidden } from "@/components/VisuallyHidden";
+import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { formatError } from "@/lib/utils";
 
 import { useToast } from "../Toaster/hooks";
@@ -102,6 +103,7 @@ const ImageUploadAndCrop: React.FC<{
 }> = ({ children, aspect, uploadAction, onUploadSuccess }) => {
   const { toast } = useToast();
   const { id } = useParams();
+  const { isMobile } = useMediaQuery();
 
   const [imgSrc, setImgSrc] = useState("");
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -253,7 +255,11 @@ const ImageUploadAndCrop: React.FC<{
           accept="image/*"
           onChange={onSelectFile}
         />
-        <div onClick={handleFileInputClick}>{children}</div>
+        <>
+          {React.cloneElement(children as React.ReactElement, {
+            onClick: handleFileInputClick,
+          })}
+        </>
       </>
       <Dialog open={!!imgSrc}>
         <DialogContent className="w-[300px]">
@@ -304,22 +310,45 @@ const ImageUploadAndCrop: React.FC<{
             )}
           </div>
           <DialogFooter>
-            <Button
-              variant="destructive"
-              onClick={clear}
-            >
-              取消
-            </Button>
-            <Button
-              disabled={uploading}
-              onClick={onUploadCropClick}
-            >
-              {uploading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "提交"
-              )}
-            </Button>
+            {isMobile ? (
+              <>
+                <Button
+                  disabled={uploading}
+                  onClick={onUploadCropClick}
+                >
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "提交"
+                  )}
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={clear}
+                >
+                  取消
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="destructive"
+                  onClick={clear}
+                >
+                  取消
+                </Button>
+                <Button
+                  disabled={uploading}
+                  onClick={onUploadCropClick}
+                >
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "提交"
+                  )}
+                </Button>
+              </>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

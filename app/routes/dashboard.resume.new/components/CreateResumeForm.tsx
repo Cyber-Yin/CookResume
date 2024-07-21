@@ -79,7 +79,7 @@ const CreateResumeForm = () => {
       />
       <div className="space-y-1.5">
         <Label>模板</Label>
-        <div className="grid w-full grid-cols-3 gap-4">
+        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {RESUME_TEMPLATE.map((item, index) => (
             <motion.div
               variants={FADE_IN_ANIMATION}

@@ -39,6 +39,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/Dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/Drawer";
 import { FormInput } from "@/components/Input";
 import { Label } from "@/components/Label";
 import { ScrollArea } from "@/components/ScrollArea";
@@ -52,6 +59,7 @@ import {
 import { useToast } from "@/components/Toaster/hooks";
 import { VisuallyHidden } from "@/components/VisuallyHidden";
 import { OPACITY_ANIMATION } from "@/lib/const/animation";
+import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { BasicDataFormState } from "@/lib/types/resume";
 import {
   cn,
@@ -277,8 +285,8 @@ const SortableList = ({
           initial="hidden"
           animate="visible"
           className={cn("grid gap-x-4 gap-y-5 overflow-hidden px-5 py-4", {
-            "grid-cols-1": editorWidth <= 300,
-            "grid-cols-2": editorWidth > 300 && editorWidth <= 900,
+            "grid-cols-1": editorWidth <= 500,
+            "grid-cols-2": editorWidth > 500 && editorWidth <= 900,
             "grid-cols-3": editorWidth > 900,
           })}
         >
@@ -478,6 +486,8 @@ const AddItemModal: React.FC<{
   onClose: () => void;
   onSubmit: (v: { label: string; value: string }) => void;
 }> = ({ open, onClose, onSubmit }) => {
+  const { isMobile } = useMediaQuery();
+
   const { toast } = useToast();
 
   const [label, setLabel] = useState("");
@@ -503,6 +513,60 @@ const AddItemModal: React.FC<{
     setLabel("");
     setValue("");
   };
+
+  if (isMobile) {
+    return (
+      <Drawer open={open}>
+        <DrawerContent className="px-4 pb-4">
+          <DrawerHeader>
+            <DrawerTitle>添加词条</DrawerTitle>
+            <VisuallyHidden asChild>
+              <DrawerDescription>添加词条</DrawerDescription>
+            </VisuallyHidden>
+          </DrawerHeader>
+          <div className="my-4 space-y-4">
+            <FormInput
+              required
+              label="标签"
+              placeholder="请输入标签"
+              value={label}
+              onValueChange={(v) => {
+                setLabel(v);
+              }}
+            />
+            <FormInput
+              required
+              label="值"
+              placeholder="请输入值"
+              value={value}
+              onValueChange={(v) => {
+                setValue(v);
+              }}
+            />
+          </div>
+
+          <div className="flex w-full flex-col items-center space-y-2">
+            <Button
+              className="w-full"
+              onClick={handleSubmit}
+            >
+              添加
+            </Button>
+            <Button
+              className="w-full"
+              variant="destructive"
+              onClick={() => {
+                onClose();
+                clear();
+              }}
+            >
+              取消
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <Dialog open={open}>

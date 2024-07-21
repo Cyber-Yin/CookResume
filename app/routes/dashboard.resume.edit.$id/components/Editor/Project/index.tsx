@@ -39,6 +39,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/Dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/Drawer";
 import { FormInput } from "@/components/Input";
 import { Label } from "@/components/Label";
 import Editor from "@/components/RichText/Editor";
@@ -47,6 +54,7 @@ import { ScrollArea } from "@/components/ScrollArea";
 import { useToast } from "@/components/Toaster/hooks";
 import { VisuallyHidden } from "@/components/VisuallyHidden";
 import { OPACITY_ANIMATION } from "@/lib/const/animation";
+import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { ProjectFormState } from "@/lib/types/resume";
 import {
   checkRichTextOutputIsNull,
@@ -360,6 +368,7 @@ const AddProjectModal: React.FC<{
   onSubmit: (v: { name: string; description: string }) => void;
 }> = ({ open, onClose, onSubmit }) => {
   const { toast } = useToast();
+  const { isMobile } = useMediaQuery();
 
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
@@ -396,6 +405,65 @@ const AddProjectModal: React.FC<{
     setProjectName("");
     setProjectDescription("");
   };
+
+  if (isMobile) {
+    return (
+      <Drawer open={open}>
+        <DrawerContent className="px-4 pb-4">
+          <DrawerHeader>
+            <DrawerTitle>添加项目经验</DrawerTitle>
+            <VisuallyHidden asChild>
+              <DrawerDescription></DrawerDescription>
+            </VisuallyHidden>
+          </DrawerHeader>
+          <ScrollArea className="my-4 h-[calc(50vh-2rem)] w-full">
+            <div className="w-full space-y-5">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-5 overflow-hidden">
+                <FormInput
+                  required
+                  value={projectName}
+                  onValueChange={(v) => {
+                    setProjectName(v);
+                  }}
+                  label="项目名称"
+                />
+              </div>
+              <div className="w-full space-y-1.5">
+                <div className="inline-flex items-center space-x-1">
+                  <Label>项目描述</Label>
+                  <div className="text-xs text-danger-light">*</div>
+                </div>
+
+                <Editor
+                  content={projectDescription}
+                  onChange={setProjectDescription}
+                />
+              </div>
+            </div>
+          </ScrollArea>
+
+          <div className="flex w-full flex-col items-center space-y-2">
+            <Button
+              className="w-full"
+              onClick={handleSubmit}
+            >
+              添加
+            </Button>
+            <Button
+              className="w-full"
+              variant="destructive"
+              onClick={() => {
+                onClose();
+                clear();
+              }}
+            >
+              取消
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <Dialog open={open}>
@@ -458,6 +526,7 @@ const ModifyProjectModal: React.FC<{
   onSubmit: (v: { key: string; name: string; description: string }) => void;
 }> = ({ defaultValue, onClose, onSubmit }) => {
   const { toast } = useToast();
+  const { isMobile } = useMediaQuery();
 
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
@@ -502,6 +571,65 @@ const ModifyProjectModal: React.FC<{
       setProjectDescription(defaultValue.description);
     }
   }, [defaultValue]);
+
+  if (isMobile) {
+    return (
+      <Drawer open={Boolean(defaultValue)}>
+        <DrawerContent className="px-4 pb-4">
+          <DrawerHeader>
+            <DrawerTitle>更改项目经验</DrawerTitle>
+            <VisuallyHidden asChild>
+              <DrawerDescription></DrawerDescription>
+            </VisuallyHidden>
+          </DrawerHeader>
+          <ScrollArea className="my-4 h-[calc(50vh-2rem)] w-full">
+            <div className="w-full space-y-5">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-5 overflow-hidden">
+                <FormInput
+                  required
+                  value={projectName}
+                  onValueChange={(v) => {
+                    setProjectName(v);
+                  }}
+                  label="项目名称"
+                />
+              </div>
+              <div className="w-full space-y-1.5">
+                <div className="inline-flex items-center space-x-1">
+                  <Label>项目描述</Label>
+                  <div className="text-xs text-danger-light">*</div>
+                </div>
+
+                <Editor
+                  content={projectDescription}
+                  onChange={setProjectDescription}
+                />
+              </div>
+            </div>
+          </ScrollArea>
+
+          <div className="flex w-full flex-col items-center space-y-2">
+            <Button
+              className="w-full"
+              onClick={handleSubmit}
+            >
+              更改
+            </Button>
+            <Button
+              className="w-full"
+              variant="destructive"
+              onClick={() => {
+                onClose();
+                clear();
+              }}
+            >
+              取消
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <Dialog open={Boolean(defaultValue)}>

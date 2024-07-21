@@ -40,16 +40,23 @@ const Header: React.FC<{
 
   return (
     <>
-      <header className="fixed z-20 flex h-16 w-full items-center justify-between bg-custom px-4 drop-shadow sm:px-6">
-        <img
-          className="h-12 w-12 cursor-pointer"
-          src="/icons/logo.svg"
-          alt="logo"
-        />
+      <header className="fixed z-20 flex h-16 w-full items-center justify-between bg-custom px-4 drop-shadow">
+        <div
+          onClick={() => navigate("/")}
+          className="flex cursor-pointer items-center space-x-2"
+        >
+          <img
+            className="h-9 w-9 sm:h-11 sm:w-11"
+            src="/icons/logo.svg"
+            alt="logo"
+          />
+          <div className="text-xl font-semibold sm:text-2xl">酷客简历</div>
+        </div>
+
         {user ? (
           <Sheet>
             <SheetTrigger asChild>
-              <Avatar className="hover:cursor-pointer">
+              <Avatar className="h-9 w-9 hover:cursor-pointer sm:h-11 sm:w-11">
                 <AvatarImage src={user.avatar || ""} />
                 <AvatarFallback>
                   {user.name.slice(0, 1).toUpperCase()}

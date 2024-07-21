@@ -85,7 +85,7 @@ const DialogContent = React.forwardRef<
             exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1 } }}
             transition={{ duration: 0.2 }}
             className={cn(
-              "fixed z-50 grid w-full gap-4 rounded-b-lg border bg-custom p-6 shadow-lg sm:max-w-xl sm:rounded-lg",
+              "fixed z-50 grid w-full gap-4 rounded-lg border bg-custom p-6 shadow-lg sm:max-w-xl sm:rounded-lg",
               className,
             )}
           >

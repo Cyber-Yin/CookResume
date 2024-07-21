@@ -20,7 +20,7 @@ const CopyButton: React.FC<{
   return (
     <div
       className={cn(
-        "group flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-custom-hover",
+        "group flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-custom-hover",
         {
           "pointer-events-none cursor-default": copied,
           "cursor-pointer": !copied,

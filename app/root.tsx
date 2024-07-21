@@ -37,8 +37,8 @@ export const links: LinksFunction = () => {
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
+    { title: "酷客简历 - 免费开源的在线简历编辑器" },
+    { name: "description", content: "免费开源的在线简历编辑器" },
   ];
 };
 
