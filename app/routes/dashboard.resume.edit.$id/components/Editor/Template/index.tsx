@@ -56,8 +56,8 @@ const TemplateEditor: React.FC = () => {
       <ScrollArea className="h-[calc(100vh-7.5rem)]">
         <div
           className={cn("grid gap-x-4 gap-y-5 overflow-hidden px-5 py-4", {
-            "grid-cols-1": editorWidth <= 300,
-            "grid-cols-2": editorWidth > 300 && editorWidth <= 900,
+            "grid-cols-1": editorWidth <= 500,
+            "grid-cols-2": editorWidth > 500 && editorWidth <= 900,
             "grid-cols-3": editorWidth > 900,
           })}
         >

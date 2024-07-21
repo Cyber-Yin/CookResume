@@ -60,7 +60,7 @@ export const action: ActionFunction = async ({ request }) => {
     }
 
     const transporter = createTransport({
-      host: "smtp.qq.com",
+      host: "smtp.feishu.cn",
       port: 465,
       secure: true,
       auth: {

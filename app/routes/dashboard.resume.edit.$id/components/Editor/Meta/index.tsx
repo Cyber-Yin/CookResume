@@ -28,6 +28,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/Dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/Drawer";
 import ImageEditor from "@/components/ImageEditor";
 import { FormInput } from "@/components/Input";
 import { Label } from "@/components/Label";
@@ -37,6 +44,7 @@ import { useToast } from "@/components/Toaster/hooks";
 import { VisuallyHidden } from "@/components/VisuallyHidden";
 import { OPACITY_ANIMATION } from "@/lib/const/animation";
 import { useHost } from "@/lib/hooks/useHost";
+import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { cn, formatError } from "@/lib/utils";
 import { useFetchResume } from "@/routes/dashboard.resume.edit.$id/hooks/useFetchResume";
 import { useFetchResumeAvatars } from "@/routes/dashboard.resume.edit.$id/hooks/useFetchResumeAvatars";
@@ -187,7 +195,7 @@ const MetaEditor: React.FC = () => {
               <div className="w-full space-y-1.5">
                 <Label>在线链接</Label>
                 <div className="flex w-full items-center space-x-1">
-                  <div className="rounded-md bg-custom-hover px-2 py-1 text-sm">{`${host}/preview/${id}`}</div>
+                  <div className="grid grid-cols-1 truncate rounded-md bg-custom-hover px-2 py-1 text-sm">{`${host}/preview/${id}`}</div>
                   <CopyButton content={`${host}/preview/${id}`} />
                 </div>
               </div>
@@ -250,6 +258,7 @@ const AvatarSelector: React.FC<{
 }> = ({ open, onClose, defaultURL, onSubmit }) => {
   const { toast } = useToast();
   const { id } = useParams();
+  const { isMobile } = useMediaQuery();
 
   const { resumeAvatars, resumeAvatarsIsLoading, refetchResumeAvatars } =
     useFetchResumeAvatars();
@@ -298,6 +307,111 @@ const AvatarSelector: React.FC<{
   };
 
   if (!resumeAvatars) return <></>;
+
+  if (isMobile) {
+    return (
+      <Drawer open={open}>
+        <DrawerContent className="px-4 pb-4">
+          <DrawerHeader>
+            <DrawerTitle>选择证件照</DrawerTitle>
+            <VisuallyHidden asChild>
+              <DrawerDescription>选择一张证件照作为头像</DrawerDescription>
+            </VisuallyHidden>
+          </DrawerHeader>
+          <ScrollArea className="h-[calc(50vh-5rem)] w-full py-4">
+            {resumeAvatarsIsLoading ? (
+              <div className="flex h-[calc(50vh-7rem)] w-full items-center justify-center">
+                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              </div>
+            ) : (
+              <>
+                {resumeAvatars.length > 0 ? (
+                  <div className="flex w-full justify-center">
+                    <div className="grid w-[332px] grid-cols-3 gap-4">
+                      {resumeAvatars.map((avatar) => (
+                        <div
+                          onClick={() =>
+                            setSelectedImage({ id: avatar.id, url: avatar.url })
+                          }
+                          key={avatar.id}
+                          className={cn(
+                            "relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border-[1.5px] border-transparent bg-custom-hover brightness-100 transition-all hover:border-primary-light hover:brightness-90",
+                            {
+                              "border-primary-light brightness-90":
+                                selectedImage.id === avatar.id,
+                              "pointer-events-none brightness-75":
+                                defaultURL === avatar.url,
+                            },
+                          )}
+                        >
+                          <img
+                            className="h-[140px] w-[100px] object-cover"
+                            src={avatar.url}
+                            alt={avatar.url}
+                          />
+                          {selectedImage.id === avatar.id && (
+                            <div className="absolute right-1.5 top-1.5 rounded-full bg-primary p-1">
+                              <Check className="h-3 w-3 text-white" />
+                            </div>
+                          )}
+                          {defaultURL === avatar.url && (
+                            <div className="absolute right-1.5 top-1.5 rounded-md bg-primary px-2 py-1 text-xs text-white">
+                              当前
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex h-[calc(50vh-7rem)] w-full items-center justify-center">
+                    <div className="text-xl font-semibold">暂无证件照</div>
+                  </div>
+                )}
+              </>
+            )}
+          </ScrollArea>
+          <div className="flex w-full flex-col items-center space-y-2">
+            <Button
+              disabled={submitLoading}
+              onClick={handleImageChange}
+              className="w-full"
+            >
+              {submitLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "保存"
+              )}
+            </Button>
+            <ImageEditor
+              aspect={5 / 7}
+              uploadAction="update_resume_avatar"
+              onUploadSuccess={(url) => refetchResumeAvatars()}
+            >
+              <Button
+                className="w-full"
+                disabled={submitLoading}
+                variant="outline"
+              >
+                上传新图片
+              </Button>
+            </ImageEditor>
+            <Button
+              onClick={() => {
+                clear();
+                onClose();
+              }}
+              disabled={submitLoading}
+              variant="destructive"
+              className="w-full"
+            >
+              取消
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <Dialog open={open}>

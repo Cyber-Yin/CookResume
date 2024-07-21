@@ -39,6 +39,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/Dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/Drawer";
 import { FormInput } from "@/components/Input";
 import { Label } from "@/components/Label";
 import Editor from "@/components/RichText/Editor";
@@ -47,6 +54,7 @@ import { ScrollArea } from "@/components/ScrollArea";
 import { useToast } from "@/components/Toaster/hooks";
 import { VisuallyHidden } from "@/components/VisuallyHidden";
 import { OPACITY_ANIMATION } from "@/lib/const/animation";
+import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { JobFormState } from "@/lib/types/resume";
 import {
   checkRichTextOutputIsNull,
@@ -396,6 +404,7 @@ const AddJobModal: React.FC<{
   }) => void;
 }> = ({ open, onClose, onSubmit }) => {
   const { toast } = useToast();
+  const { isMobile } = useMediaQuery();
 
   const [jobExperience, setJobExperience] = useState("");
   const [jobBasicData, setJobBasicData] = useState({
@@ -440,6 +449,98 @@ const AddJobModal: React.FC<{
       endDate: "",
     });
   };
+
+  if (isMobile) {
+    return (
+      <Drawer open={open}>
+        <DrawerContent className="px-4 pb-4">
+          <DrawerHeader>
+            <DrawerTitle>添加工作经历</DrawerTitle>
+            <VisuallyHidden asChild>
+              <DrawerDescription></DrawerDescription>
+            </VisuallyHidden>
+          </DrawerHeader>
+          <ScrollArea className="my-4 h-[calc(50vh-2rem)] w-full">
+            <div className="w-full space-y-5">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-5 overflow-hidden sm:grid-cols-2">
+                <FormInput
+                  required
+                  value={jobBasicData.company}
+                  onValueChange={(v) => {
+                    setJobBasicData((prev) => ({
+                      ...prev,
+                      company: v,
+                    }));
+                  }}
+                  label="公司名称"
+                />
+                <FormInput
+                  value={jobBasicData.role}
+                  onValueChange={(v) => {
+                    setJobBasicData((prev) => ({
+                      ...prev,
+                      role: v,
+                    }));
+                  }}
+                  label="岗位"
+                />
+                <FormInput
+                  required
+                  value={jobBasicData.startDate}
+                  onValueChange={(v) => {
+                    setJobBasicData((prev) => ({
+                      ...prev,
+                      startDate: v,
+                    }));
+                  }}
+                  placeholder="格式：2022.01.01"
+                  label="开始时间"
+                />
+                <FormInput
+                  required
+                  value={jobBasicData.endDate}
+                  onValueChange={(v) => {
+                    setJobBasicData((prev) => ({
+                      ...prev,
+                      endDate: v,
+                    }));
+                  }}
+                  placeholder="格式：2022.01.01"
+                  label="结束时间"
+                />
+              </div>
+              <div className="w-full space-y-1.5">
+                <Label>经历</Label>
+                <Editor
+                  content={jobExperience}
+                  onChange={setJobExperience}
+                />
+              </div>
+            </div>
+          </ScrollArea>
+
+          <div className="flex w-full flex-col items-center space-y-2">
+            <Button
+              className="w-full"
+              onClick={handleSubmit}
+            >
+              添加
+            </Button>
+            <Button
+              className="w-full"
+              variant="destructive"
+              onClick={() => {
+                onClose();
+                clear();
+              }}
+            >
+              取消
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <Dialog open={open}>
@@ -545,6 +646,7 @@ const ModifyJobModal: React.FC<{
   }) => void;
 }> = ({ defaultValue, onClose, onSubmit }) => {
   const { toast } = useToast();
+  const { isMobile } = useMediaQuery();
 
   const [jobExperience, setJobExperience] = useState("");
   const [jobBasicData, setJobBasicData] = useState({
@@ -602,6 +704,98 @@ const ModifyJobModal: React.FC<{
       });
     }
   }, [defaultValue]);
+
+  if (isMobile) {
+    return (
+      <Drawer open={Boolean(defaultValue)}>
+        <DrawerContent className="px-4 pb-4">
+          <DrawerHeader>
+            <DrawerTitle>更改工作经历</DrawerTitle>
+            <VisuallyHidden asChild>
+              <DrawerDescription></DrawerDescription>
+            </VisuallyHidden>
+          </DrawerHeader>
+          <ScrollArea className="my-4 h-[calc(50vh-2rem)] w-full">
+            <div className="w-full space-y-5">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-5 overflow-hidden sm:grid-cols-2">
+                <FormInput
+                  required
+                  value={jobBasicData.company}
+                  onValueChange={(v) => {
+                    setJobBasicData((prev) => ({
+                      ...prev,
+                      company: v,
+                    }));
+                  }}
+                  label="公司名称"
+                />
+                <FormInput
+                  value={jobBasicData.role}
+                  onValueChange={(v) => {
+                    setJobBasicData((prev) => ({
+                      ...prev,
+                      role: v,
+                    }));
+                  }}
+                  label="岗位"
+                />
+                <FormInput
+                  required
+                  value={jobBasicData.startDate}
+                  onValueChange={(v) => {
+                    setJobBasicData((prev) => ({
+                      ...prev,
+                      startDate: v,
+                    }));
+                  }}
+                  placeholder="格式：2022.01.01"
+                  label="开始时间"
+                />
+                <FormInput
+                  required
+                  value={jobBasicData.endDate}
+                  onValueChange={(v) => {
+                    setJobBasicData((prev) => ({
+                      ...prev,
+                      endDate: v,
+                    }));
+                  }}
+                  placeholder="格式：2022.01.01"
+                  label="结束时间"
+                />
+              </div>
+              <div className="w-full space-y-1.5">
+                <Label>经历</Label>
+                <Editor
+                  content={jobExperience}
+                  onChange={setJobExperience}
+                />
+              </div>
+            </div>
+          </ScrollArea>
+
+          <div className="flex w-full flex-col items-center space-y-2">
+            <Button
+              className="w-full"
+              onClick={handleSubmit}
+            >
+              更改
+            </Button>
+            <Button
+              className="w-full"
+              variant="destructive"
+              onClick={() => {
+                onClose();
+                clear();
+              }}
+            >
+              取消
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <Dialog open={Boolean(defaultValue)}>

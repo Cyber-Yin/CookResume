@@ -91,7 +91,7 @@ export default function PreviewPage() {
       >
         {({ zoomIn, zoomOut, resetTransform, ...rest }) => (
           <div className="relative h-full w-full">
-            <div className="tools absolute right-4 top-4 z-10 flex h-8 items-center space-x-2 rounded-lg bg-custom p-4">
+            <div className="tools absolute right-4 top-4 z-10 flex h-8 items-center space-x-2 rounded-lg border border-custom bg-custom p-4 drop-shadow">
               <ZoomIn
                 onClick={() => zoomIn()}
                 className="h-4 w-4 cursor-pointer transition-colors hover:text-primary"

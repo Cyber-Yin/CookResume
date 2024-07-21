@@ -39,6 +39,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/Dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/Drawer";
 import { FormInput } from "@/components/Input";
 import { Label } from "@/components/Label";
 import Editor from "@/components/RichText/Editor";
@@ -47,6 +54,7 @@ import { ScrollArea } from "@/components/ScrollArea";
 import { useToast } from "@/components/Toaster/hooks";
 import { VisuallyHidden } from "@/components/VisuallyHidden";
 import { OPACITY_ANIMATION } from "@/lib/const/animation";
+import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { EducationFormState } from "@/lib/types/resume";
 import {
   checkRichTextOutputIsNull,
@@ -398,6 +406,7 @@ const AddEducationModal: React.FC<{
   }) => void;
 }> = ({ open, onClose, onSubmit }) => {
   const { toast } = useToast();
+  const { isMobile } = useMediaQuery();
 
   const [educationExperience, setEducationExperience] = useState("");
   const [educationBasicData, setEducationBasicData] = useState({
@@ -442,6 +451,98 @@ const AddEducationModal: React.FC<{
       endDate: "",
     });
   };
+
+  if (isMobile) {
+    return (
+      <Drawer open={open}>
+        <DrawerContent className="px-4 pb-4">
+          <DrawerHeader>
+            <DrawerTitle>添加教育背景</DrawerTitle>
+            <VisuallyHidden asChild>
+              <DrawerDescription></DrawerDescription>
+            </VisuallyHidden>
+          </DrawerHeader>
+          <ScrollArea className="my-4 h-[calc(50vh-2rem)] w-full">
+            <div className="w-full space-y-5">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-5 overflow-hidden sm:grid-cols-2">
+                <FormInput
+                  required
+                  value={educationBasicData.school}
+                  onValueChange={(v) => {
+                    setEducationBasicData((prev) => ({
+                      ...prev,
+                      school: v,
+                    }));
+                  }}
+                  label="学校"
+                />
+                <FormInput
+                  value={educationBasicData.major}
+                  onValueChange={(v) => {
+                    setEducationBasicData((prev) => ({
+                      ...prev,
+                      major: v,
+                    }));
+                  }}
+                  label="专业"
+                />
+                <FormInput
+                  required
+                  value={educationBasicData.startDate}
+                  onValueChange={(v) => {
+                    setEducationBasicData((prev) => ({
+                      ...prev,
+                      startDate: v,
+                    }));
+                  }}
+                  placeholder="格式：2022.01.01"
+                  label="开始时间"
+                />
+                <FormInput
+                  required
+                  value={educationBasicData.endDate}
+                  onValueChange={(v) => {
+                    setEducationBasicData((prev) => ({
+                      ...prev,
+                      endDate: v,
+                    }));
+                  }}
+                  placeholder="格式：2022.01.01"
+                  label="结束时间"
+                />
+              </div>
+              <div className="w-full space-y-1.5">
+                <Label>经历</Label>
+                <Editor
+                  content={educationExperience}
+                  onChange={setEducationExperience}
+                />
+              </div>
+            </div>
+          </ScrollArea>
+
+          <div className="flex w-full flex-col items-center space-y-2">
+            <Button
+              className="w-full"
+              onClick={handleSubmit}
+            >
+              添加
+            </Button>
+            <Button
+              className="w-full"
+              variant="destructive"
+              onClick={() => {
+                onClose();
+                clear();
+              }}
+            >
+              取消
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <Dialog open={open}>
@@ -547,6 +648,7 @@ const ModifyEducationModal: React.FC<{
   }) => void;
 }> = ({ onClose, onSubmit, defaultValue }) => {
   const { toast } = useToast();
+  const { isMobile } = useMediaQuery();
 
   const [educationExperience, setEducationExperience] = useState("");
   const [educationBasicData, setEducationBasicData] = useState({
@@ -604,6 +706,98 @@ const ModifyEducationModal: React.FC<{
       });
     }
   }, [defaultValue]);
+
+  if (isMobile) {
+    return (
+      <Drawer open={Boolean(defaultValue)}>
+        <DrawerContent className="px-4 pb-4">
+          <DrawerHeader>
+            <DrawerTitle>更改教育背景</DrawerTitle>
+            <VisuallyHidden asChild>
+              <DrawerDescription></DrawerDescription>
+            </VisuallyHidden>
+          </DrawerHeader>
+          <ScrollArea className="my-4 h-[calc(50vh-2rem)] w-full">
+            <div className="w-full space-y-5">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-5 overflow-hidden sm:grid-cols-2">
+                <FormInput
+                  required
+                  value={educationBasicData.school}
+                  onValueChange={(v) => {
+                    setEducationBasicData((prev) => ({
+                      ...prev,
+                      school: v,
+                    }));
+                  }}
+                  label="学校"
+                />
+                <FormInput
+                  value={educationBasicData.major}
+                  onValueChange={(v) => {
+                    setEducationBasicData((prev) => ({
+                      ...prev,
+                      major: v,
+                    }));
+                  }}
+                  label="专业"
+                />
+                <FormInput
+                  required
+                  value={educationBasicData.startDate}
+                  onValueChange={(v) => {
+                    setEducationBasicData((prev) => ({
+                      ...prev,
+                      startDate: v,
+                    }));
+                  }}
+                  placeholder="格式：2022.01.01"
+                  label="开始时间"
+                />
+                <FormInput
+                  required
+                  value={educationBasicData.endDate}
+                  onValueChange={(v) => {
+                    setEducationBasicData((prev) => ({
+                      ...prev,
+                      endDate: v,
+                    }));
+                  }}
+                  placeholder="格式：2022.01.01"
+                  label="结束时间"
+                />
+              </div>
+              <div className="w-full space-y-1.5">
+                <Label>经历</Label>
+                <Editor
+                  content={educationExperience}
+                  onChange={setEducationExperience}
+                />
+              </div>
+            </div>
+          </ScrollArea>
+
+          <div className="flex w-full flex-col items-center space-y-2">
+            <Button
+              className="w-full"
+              onClick={handleSubmit}
+            >
+              更改
+            </Button>
+            <Button
+              className="w-full"
+              variant="destructive"
+              onClick={() => {
+                onClose();
+                clear();
+              }}
+            >
+              取消
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <Dialog open={Boolean(defaultValue)}>
