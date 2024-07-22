@@ -18,7 +18,8 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma
 COPY --from=prod-deps /app/node_modules ./node_modules
 ENV NODE_ENV production
+ENV PORT 10001
 
 EXPOSE 10001
 
-CMD ["sh", "-c", "PORT=10001 yarn start"]
+CMD ["yarn", "start"]
