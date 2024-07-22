@@ -1,0 +1,43 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+model user {
+    id            Int     @id @default(autoincrement())
+    user_name     String  @unique @db.VarChar(255)
+    email         String  @unique @db.VarChar(255)
+    password      String  @db.Char(64)
+    salt          String  @db.Char(64)
+    avatar        String? @db.VarChar(255)
+    banned        Int     @db.UnsignedTinyInt
+    registered_at Int     @db.UnsignedInt
+}
+
+model resume {
+    id         Int     @id @default(autoincrement())
+    title      String  @db.VarChar(255)
+    user_id    Int     @db.UnsignedInt
+    content    String  @db.LongText
+    published  Int     @db.UnsignedTinyInt
+    created_at Int     @db.UnsignedInt
+    updated_at Int     @db.UnsignedInt
+    template   Int     @db.UnsignedInt
+    avatar     String? @db.VarChar(255)
+
+    @@index([user_id])
+}
+
+model image {
+    id         Int    @id @default(autoincrement())
+    user_id    Int    @db.UnsignedInt
+    type       Int    @db.UnsignedTinyInt
+    url        String @db.VarChar(255)
+    created_at Int    @db.UnsignedInt
+
+    @@index([user_id, type])
+}

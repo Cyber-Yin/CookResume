@@ -1,0 +1,38 @@
+name: Publish Production Docker Image
+
+on:
+  push:
+    branches:
+      - release/v*.*.*
+
+jobs:
+  build-and-push:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Get release version
+        uses: actions/github-script@v6
+        id: release_version
+        with:
+          result-encoding: string
+          script: |
+            const version = context.ref.split('/').pop()
+            return version
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: cyberyin/cook-resume:${{ steps.release_version.outputs.result }}
