@@ -1,10 +1,14 @@
+import { useNavigate } from "@remix-run/react";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 
 import { Button } from "@/components/Button";
+import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 
 export default function Index() {
+  const navigate = useNavigate();
+
   return (
     <>
       <Header />
@@ -30,18 +34,22 @@ export default function Index() {
                 免费、开源、可自托管的在线简历编辑器
               </h2>
               <div className="relative z-10 flex items-end space-x-2">
-                <Button>快速开始</Button>
+                <Button onClick={() => navigate("/sign-in")}>快速开始</Button>
                 <Button
                   className="bg-black"
                   asChild
                 >
-                  <div className="flex cursor-pointer items-center space-x-1">
+                  <a
+                    href="https://github.com/Cyber-Yin/CookResume"
+                    target="_blank"
+                    className="flex cursor-pointer items-center space-x-1"
+                  >
                     <img
                       src="/icons/github.svg"
                       className="h-5 w-5"
                     />
                     <div>Github</div>
-                  </div>
+                  </a>
                 </Button>
               </div>
             </motion.div>
@@ -64,39 +72,7 @@ export default function Index() {
         <CustomDescriptionIV />
         <CustomDescriptionV />
       </main>
-      <footer className="w-full border-t border-custom bg-custom px-4 py-8">
-        <div className="mx-auto grid w-full max-w-screen-xl grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-          <div className="space-y-4">
-            <div>
-              <img
-                src="/icons/logo.svg"
-                alt=""
-                className="h-9 w-9 sm:h-10 sm:w-10"
-              />
-            </div>
-            <div className="space-y-1">
-              <div className="text-lg font-semibold sm:text-xl">酷客简历</div>
-              <div className="text-xs text-custom-secondary sm:text-sm">
-                免费、开源、可自托管的在线简历编辑器
-              </div>
-            </div>
-            <div className="text-xs sm:text-sm">Licensed Under GPL</div>
-          </div>
-          <div className="space-y-2">
-            <div className="text-sm font-semibold sm:text-base">项目资源</div>
-            <div className="space-y-1">
-              <div className="text-xs sm:text-sm">Github</div>
-              <div className="text-xs sm:text-sm">用户协议</div>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="text-sm font-semibold sm:text-base">技术支持</div>
-            <div className="space-y-1">
-              <div className="text-xs sm:text-sm">support@cookresume.com</div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }
@@ -386,7 +362,7 @@ const CustomDescriptionV: React.FC = () => {
           >
             <div className="text-lg sm:text-xl">
               可通过 <span className="text-primary-light">Docker</span>{" "}
-              镜像自托管项目
+              镜像自托管部署
             </div>
           </motion.div>
           <motion.div
@@ -396,23 +372,15 @@ const CustomDescriptionV: React.FC = () => {
             }}
             transition={{ duration: 0.5, delay: 0.6 }}
           >
-            <div className="text-lg sm:text-xl">任何功能不受限制使用</div>
+            <div className="text-lg sm:text-xl">开源项目，支持代码审查</div>
           </motion.div>
+
           <motion.div
             animate={{
               opacity: entry?.isIntersecting ? 1 : 0,
               y: entry?.isIntersecting ? 0 : 30,
             }}
             transition={{ duration: 0.5, delay: 0.8 }}
-          >
-            <div className="text-lg sm:text-xl">专业的技术支持</div>
-          </motion.div>
-          <motion.div
-            animate={{
-              opacity: entry?.isIntersecting ? 1 : 0,
-              y: entry?.isIntersecting ? 0 : 30,
-            }}
-            transition={{ duration: 0.5, delay: 1 }}
           >
             <div className="text-lg sm:text-xl">......</div>
           </motion.div>

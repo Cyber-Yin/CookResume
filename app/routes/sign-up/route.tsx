@@ -350,9 +350,13 @@ export default function SignUpPage() {
                   我已阅读
                 </Label>
               </div>
-              <span className="cursor-pointer text-sm font-semibold text-primary">
-                《隐私协议》
-              </span>
+              <a
+                href="/privacy-policy"
+                target="_blank"
+                className="text-sm font-semibold text-primary"
+              >
+                《隐私政策》
+              </a>
             </div>
             <div className="flex w-full flex-col items-center space-y-2">
               <Button
