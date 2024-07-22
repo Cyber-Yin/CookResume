@@ -198,7 +198,7 @@ const SortableItem = ({
           <div
             {...attributes}
             {...listeners}
-            className="cursor-grab"
+            className="cursor-grab touch-none"
           >
             <Menu className="h-3.5 w-3.5" />
           </div>
@@ -242,7 +242,7 @@ const SortableItem = ({
         <div
           {...attributes}
           {...listeners}
-          className="cursor-grab"
+          className="cursor-grab touch-none"
         >
           <Menu className="h-3.5 w-3.5" />
         </div>
