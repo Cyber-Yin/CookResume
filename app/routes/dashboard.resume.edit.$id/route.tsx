@@ -162,6 +162,9 @@ const DesktopPanel: React.FC = () => {
                       width: "100%",
                       height: "calc(100vh - 4rem)",
                     }}
+                    contentStyle={{
+                      transition: "transform 0.08s ease",
+                    }}
                   >
                     <motion.div
                       initial={{
@@ -294,6 +297,9 @@ const MobilePanel = () => {
                   backgroundColor: "#404040",
                   width: "100%",
                   height: "100vh",
+                }}
+                contentStyle={{
+                  transition: "transform 0.08s ease",
                 }}
               >
                 <motion.div
