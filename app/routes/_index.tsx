@@ -14,7 +14,7 @@ export default function Index() {
   return (
     <>
       <Header />
-      <main className="w-full pt-16">
+      <main className="w-full overflow-hidden pt-16">
         <div className="relative flex h-[600px] w-full flex-col bg-custom px-6 py-10 sm:h-[calc(80vh-4rem)] sm:min-h-[600px] sm:flex-row sm:py-0">
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/30 backdrop-blur-sm">
             <div className="h-full w-full bg-gradient-to-t from-blue-200 to-transparent"></div>
