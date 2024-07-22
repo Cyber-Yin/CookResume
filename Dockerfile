@@ -21,4 +21,4 @@ ENV NODE_ENV production
 
 EXPOSE 10001
 
-CMD ["yarn", "start"]
+CMD ["PORT=10001", "yarn", "start"]
