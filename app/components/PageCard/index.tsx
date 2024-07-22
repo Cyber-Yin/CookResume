@@ -5,11 +5,11 @@ const PageCard: React.FC<{
   title: string;
 }> = ({ children, title }) => {
   return (
-    <div className="mx-auto flex h-screen min-h-screen w-full items-center sm:h-auto sm:w-[500px] sm:py-20">
+    <div className="mx-auto flex min-h-screen w-full items-center sm:h-auto sm:w-[500px] sm:py-20">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="flex h-full w-full flex-col items-center justify-center space-y-12 bg-custom px-4 py-16 sm:h-auto sm:rounded-lg sm:border-t-4 sm:border-t-primary sm:shadow-lg"
+        className="flex h-full min-h-screen w-full flex-col items-center justify-center space-y-12 bg-custom px-4 py-16 sm:h-auto sm:min-h-px sm:rounded-lg sm:border-t-4 sm:border-t-primary sm:shadow-lg"
       >
         <div className="flex w-full items-center justify-center">
           <img

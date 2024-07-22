@@ -111,6 +111,9 @@ export default function PreviewPage() {
                 width: "100%",
                 height: "100%",
               }}
+              contentStyle={{
+                transition: "transform 0.08s ease",
+              }}
             >
               <motion.div
                 initial={{
