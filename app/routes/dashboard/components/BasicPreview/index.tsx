@@ -1,4 +1,6 @@
-import { ResumeContent, ResumeMeta } from "@/lib/types/resume";
+import { useMemo } from "react";
+
+import { ResumeBasicData, ResumeContent, ResumeMeta } from "@/lib/types/resume";
 
 const LableName = "基本信息";
 
@@ -10,6 +12,22 @@ const BasicPreview: React.FC<{
   if (content.basic.length === 0) {
     return null;
   }
+
+  const chunks = useMemo(
+    () =>
+      content.basic.reduce<ResumeBasicData[][]>((acc, item, index) => {
+        const chunkIndex = Math.floor(index / 4);
+
+        if (!acc[chunkIndex]) {
+          acc[chunkIndex] = [];
+        }
+
+        acc[chunkIndex].push(item);
+
+        return acc;
+      }, []),
+    [content.basic],
+  );
 
   switch (template) {
     case "template_kbs":
@@ -114,6 +132,35 @@ const BasicPreview: React.FC<{
                 ) : null;
               })}
             </div>
+          </div>
+        </div>
+      );
+    case "template_dcv":
+      return (
+        <div
+          key={template}
+          className="w-3/4 space-y-3"
+        >
+          <div className="flex flex-col items-center justify-center space-y-3">
+            {chunks.map((chunk, index) => {
+              return (
+                <div
+                  className="flex items-center divide-x divide-[#ccc]"
+                  key={index}
+                >
+                  {chunk.map((item) => {
+                    return item.value ? (
+                      <div
+                        className="px-2"
+                        key={item.key}
+                      >
+                        {item.value}
+                      </div>
+                    ) : null;
+                  })}
+                </div>
+              );
+            })}
           </div>
         </div>
       );

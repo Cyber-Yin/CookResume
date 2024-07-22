@@ -7,7 +7,7 @@ import JobPreview from "../JobPreview";
 import ProjectPreview from "../ProjectPreview";
 import SkillPreview from "../SkillPreview";
 
-const TemplateXAI: React.FC<{
+const TemplateDCV: React.FC<{
   content?: ResumeContent;
   meta?: ResumeMeta;
 }> = ({ content, meta }) => {
@@ -21,7 +21,9 @@ const TemplateXAI: React.FC<{
 
   return (
     <div className="relative">
-      <div className="text-2xl font-semibold">{meta.title}</div>
+      <div className="w-3/4 text-center text-2xl font-semibold">
+        {meta.title}
+      </div>
       {meta.avatar && (
         <div className="absolute right-2 top-2">
           <img
@@ -42,7 +44,7 @@ const TemplateXAI: React.FC<{
                       key={label}
                       content={content}
                       meta={meta}
-                      template="template_xai"
+                      template="template_dcv"
                     />
                   );
                 case "education":
@@ -51,7 +53,7 @@ const TemplateXAI: React.FC<{
                       key={label}
                       content={content}
                       meta={meta}
-                      template="template_xai"
+                      template="template_dcv"
                     />
                   );
                 case "job":
@@ -60,7 +62,7 @@ const TemplateXAI: React.FC<{
                       key={label}
                       content={content}
                       meta={meta}
-                      template="template_xai"
+                      template="template_dcv"
                     />
                   );
                 case "project":
@@ -69,7 +71,7 @@ const TemplateXAI: React.FC<{
                       key={label}
                       content={content}
                       meta={meta}
-                      template="template_xai"
+                      template="template_dcv"
                     />
                   );
                 case "skill":
@@ -78,7 +80,7 @@ const TemplateXAI: React.FC<{
                       key={label}
                       content={content}
                       meta={meta}
-                      template="template_xai"
+                      template="template_dcv"
                     />
                   );
                 case "custom":
@@ -87,7 +89,7 @@ const TemplateXAI: React.FC<{
                       key={label}
                       content={content}
                       meta={meta}
-                      template="template_xai"
+                      template="template_dcv"
                     />
                   );
                 default:
@@ -100,32 +102,32 @@ const TemplateXAI: React.FC<{
             <BasicPreview
               content={content}
               meta={meta}
-              template="template_xai"
+              template="template_dcv"
             />
             <EducationPreview
               content={content}
               meta={meta}
-              template="template_xai"
+              template="template_dcv"
             />
             <SkillPreview
               content={content}
               meta={meta}
-              template="template_xai"
+              template="template_dcv"
             />
             <JobPreview
               content={content}
               meta={meta}
-              template="template_xai"
+              template="template_dcv"
             />
             <ProjectPreview
               content={content}
               meta={meta}
-              template="template_xai"
+              template="template_dcv"
             />
             <CustomPreview
               content={content}
               meta={meta}
-              template="template_xai"
+              template="template_dcv"
             />
           </>
         )}
@@ -134,4 +136,4 @@ const TemplateXAI: React.FC<{
   );
 };
 
-export default TemplateXAI;
+export default TemplateDCV;
