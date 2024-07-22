@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 
-import Viewer from "@/components/RichText/Viewer";
 import { ResumeContent, ResumeMeta } from "@/lib/types/resume";
 
 import BasicPreview from "../BasicPreview";

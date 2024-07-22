@@ -6,6 +6,8 @@ import { Button } from "@/components/Button";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 
+import { RESUME_TEMPLATE } from "./dashboard/const";
+
 export default function Index() {
   const navigate = useNavigate();
 
@@ -153,7 +155,7 @@ const CustomDescriptionII: React.FC = () => {
         <div className="relative flex basis-2/3 items-center overflow-hidden py-2">
           <motion.div
             animate={{
-              x: [400, 0, 400, 0, 400],
+              x: [300, 0, 300, 0, 300],
               transition: {
                 x: {
                   duration: 8,
@@ -166,31 +168,16 @@ const CustomDescriptionII: React.FC = () => {
             }}
             className="flex items-center justify-end space-x-4 rounded-lg drop-shadow"
           >
-            <img
-              className="max-h-[500px] object-contain"
-              src="/resume-template/t1.png"
-              alt=""
-            />
-            <img
-              className="max-h-[500px] object-contain"
-              src="/resume-template/t1.png"
-              alt=""
-            />
-            <img
-              className="max-h-[500px] object-contain"
-              src="/resume-template/t1.png"
-              alt=""
-            />
-            <img
-              className="max-h-[500px] object-contain"
-              src="/resume-template/t3.png"
-              alt=""
-            />
-            <img
-              className="max-h-[500px] object-contain"
-              src="/resume-template/t2.png"
-              alt=""
-            />
+            {RESUME_TEMPLATE.map((item) => {
+              return (
+                <img
+                  key={item.id}
+                  className="max-h-[500px] object-contain"
+                  src={item.img}
+                  alt=""
+                />
+              );
+            })}
           </motion.div>
           <div className="absolute bottom-0 right-0 top-0 w-10 bg-gradient-to-l from-white to-transparent"></div>
           <div className="absolute bottom-0 left-0 top-0 w-10 bg-gradient-to-r from-white to-transparent"></div>

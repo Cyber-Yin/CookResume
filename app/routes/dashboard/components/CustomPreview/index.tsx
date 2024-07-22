@@ -71,6 +71,22 @@ const CustomPreview: React.FC<{
           </div>
         </div>
       );
+    case "template_dcv":
+      return (
+        <div
+          key={template}
+          className="w-full space-y-3"
+        >
+          <div className="flex w-full items-center space-x-2 border-b border-black">
+            <div className="shrink-0 text-lg font-semibold text-black">
+              {content.custom.label}
+            </div>
+          </div>
+          <div className="w-full space-y-2">
+            <Viewer content={content.custom.value} />
+          </div>
+        </div>
+      );
     default:
       return null;
   }

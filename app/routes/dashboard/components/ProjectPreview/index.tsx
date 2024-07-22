@@ -103,6 +103,32 @@ const ProjectPreview: React.FC<{
           })}
         </div>
       );
+    case "template_dcv":
+      return (
+        <div
+          key={template}
+          className="w-full space-y-3"
+        >
+          <div className="flex w-full items-center space-x-2 border-b border-black">
+            <div className="shrink-0 text-lg font-semibold text-black">
+              {LableName}
+            </div>
+          </div>
+          {content.project.map((item) => {
+            return (
+              <div
+                key={item.key}
+                className="w-full space-y-2"
+              >
+                <div className="flex w-full items-center justify-between font-semibold">
+                  <div>{item.name}</div>
+                </div>
+                {item.description && <Viewer content={item.description} />}
+              </div>
+            );
+          })}
+        </div>
+      );
     default:
       return null;
   }

@@ -93,8 +93,7 @@
   }
 
   @media print {
-    body,
-    html {
+    @page {
       background-color: "#fff";
     }
   }
