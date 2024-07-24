@@ -35,4 +35,6 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: cyberyin/cook-resume:${{ steps.release_version.outputs.result }}
+          tags: |
+            cyberyin/cook-resume:${{ steps.release_version.outputs.result }}
+            cyberyin/cook-resume:latest
